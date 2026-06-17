@@ -4,11 +4,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Admin Dashboard — TimesTable Dojo</title>
+<title>Admin Dashboard — Revision Dojo</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-/* ========== YOUR EXISTING STYLES - PRESERVED ========== */
+/* ========== ALL STYLES - PRESERVED ========== */
 :root{
   --sky:#eef6ff;--sky2:#d0e8fa;--sky3:#b8d8f5;
   --ink:#1a2638;--ink2:#3b4d63;--ink3:#7088a0;
@@ -161,8 +161,6 @@ body{font-family:'Nunito',sans-serif;background:var(--sky);color:var(--ink);over
 .student-status-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:99px;font-size:9px;font-weight:900}
 .student-view-btn{background:var(--blue-lt);border:none;color:var(--blue);font-size:10px;padding:4px 10px;border-radius:99px;cursor:pointer}
 .student-view-btn:hover{background:var(--blue);color:#fff}
-
-/* NEW STYLES FOR FILE ATTACHMENTS IN ADMIN */
 .file-attachment-item{background:var(--sky);border-radius:var(--r);padding:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
 .file-preview-icon{width:40px;height:40px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px}
 .file-info{flex:1;margin-left:12px}
@@ -188,7 +186,7 @@ body{font-family:'Nunito',sans-serif;background:var(--sky);color:var(--ink);over
 <div id="app">
   <nav class="sidebar">
     <div class="sb-logo">
-      <div class="sb-logo-text">Times<span>Dojo</span></div>
+      <div class="sb-logo-text">Revision<span>Dojo</span></div>
       <div class="sb-pill"><div class="sb-dot"></div> Super Admin</div>
     </div>
     <div class="sb-nav">
@@ -206,6 +204,9 @@ body{font-family:'Nunito',sans-serif;background:var(--sky);color:var(--ink);over
       <div class="sb-sec">People</div>
       <div class="sb-item" data-page="students"><i class="fas fa-user-graduate"></i> Students</div>
       <div class="sb-item" data-page="tutors"><i class="fas fa-chalkboard"></i> Tutors</div>
+      
+      <div class="sb-sec">Developer Hub</div>
+      <div class="sb-item" data-page="developer"><i class="fas fa-code"></i> Developer Projects <span class="sb-badge" id="devCount">0</span></div>
       
       <div class="sb-sec">Analytics</div>
       <div class="sb-item" data-page="belts"><i class="fas fa-award"></i> Belt Analytics</div>
@@ -234,7 +235,7 @@ body{font-family:'Nunito',sans-serif;background:var(--sky);color:var(--ink);over
     </div>
 
     <div class="content">
-      <!-- OVERVIEW PAGE (existing - preserved) -->
+      <!-- OVERVIEW PAGE -->
       <div class="page on" id="page-overview">
         <div class="g4" id="kpiRow"></div>
         <div class="g23">
@@ -247,13 +248,13 @@ body{font-family:'Nunito',sans-serif;background:var(--sky);color:var(--ink);over
         </div>
       </div>
 
-      <!-- ACTIVITY PAGE (existing - preserved) -->
+      <!-- ACTIVITY PAGE -->
       <div class="page" id="page-activity">
         <div class="g4"><div class="kpi kb"><div class="kpi-icon"><i class="fas fa-user-friends"></i></div><div class="kpi-val" id="actStudents">—</div><div class="kpi-lbl">Total Students</div></div><div class="kpi kgr"><div class="kpi-icon"><i class="fas fa-star"></i></div><div class="kpi-val" id="actBelts">—</div><div class="kpi-lbl">Belts Awarded</div></div><div class="kpi kg"><div class="kpi-icon"><i class="fas fa-dollar-sign"></i></div><div class="kpi-val" id="actRev">$—</div><div class="kpi-lbl">Est. Revenue</div></div><div class="kpi kp"><div class="kpi-icon"><i class="fas fa-check-circle"></i></div><div class="kpi-val" id="actQ">—</div><div class="kpi-lbl">Questions Answered</div></div></div>
         <div class="card"><div class="card-h"><div class="card-t"><i class="fas fa-history"></i> Recent Training Sessions</div><div style="font-size:10px;font-weight:700;color:var(--ink3)" id="actCount"></div></div><div class="card-b"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Time</th><th>Student</th><th>County</th><th>School</th><th>Belt</th><th>Passed</th><th>Accuracy</th><th>Time Used</th><th>Questions</th></thead><tbody id="actTable"></tbody></table></div></div></div>
       </div>
 
-      <!-- CREATE ASSESSMENT PAGE (UPDATED with "Requires Upload" checkbox) -->
+      <!-- CREATE ASSESSMENT PAGE -->
       <div class="page" id="page-create">
         <div class="progress-steps">
           <div class="step active" id="step1">1. Upload PDF</div>
@@ -337,7 +338,7 @@ body{font-family:'Nunito',sans-serif;background:var(--sky);color:var(--ink);over
         </div>
       </div>
 
-      <!-- CONTENT LIBRARY PAGE (UPDATED with Submissions tab for each content) -->
+      <!-- CONTENT LIBRARY PAGE -->
       <div class="page" id="page-library">
         <div class="filter-group">
           <select id="filterCurriculum" class="filter-select"><option value="">All Curriculums</option></select>
@@ -351,7 +352,7 @@ body{font-family:'Nunito',sans-serif;background:var(--sky);color:var(--ink);over
         </div>
       </div>
 
-      <!-- NEW: STUDENT SUBMISSIONS PAGE -->
+      <!-- STUDENT SUBMISSIONS PAGE -->
       <div class="page" id="page-submissions">
         <div class="filter-group">
           <select id="submissionContentFilter" class="filter-select"><option value="">All Content</option></select>
@@ -366,7 +367,7 @@ body{font-family:'Nunito',sans-serif;background:var(--sky);color:var(--ink);over
         </div>
       </div>
 
-      <!-- QUESTION BANK PAGE (existing) -->
+      <!-- QUESTION BANK PAGE -->
       <div class="page" id="page-bank">
         <div class="filter-group">
           <input type="text" id="searchQuestion" class="filter-select" placeholder="Search questions..." style="flex:2">
@@ -379,7 +380,7 @@ body{font-family:'Nunito',sans-serif;background:var(--sky);color:var(--ink);over
         </div>
       </div>
 
-      <!-- CURRICULUM MANAGER PAGE (existing) -->
+      <!-- CURRICULUM MANAGER PAGE -->
       <div class="page" id="page-curriculum">
         <div class="g2">
           <div class="card"><div class="card-h"><div class="card-t"><i class="fas fa-school"></i> Curriculums</div><button class="card-a" id="addCurriculumBtn">+ Add</button></div><div class="card-b"><div id="curriculumList"></div></div></div>
@@ -388,7 +389,7 @@ body{font-family:'Nunito',sans-serif;background:var(--sky);color:var(--ink);over
         <div class="card"><div class="card-h"><div class="card-t"><i class="fas fa-book"></i> Subjects</div><button class="card-a" id="addSubjectBtn">+ Add</button></div><div class="card-b"><div id="subjectMatrix"></div></div></div>
       </div>
 
-      <!-- STUDENTS PAGE (existing) -->
+      <!-- STUDENTS PAGE -->
       <div class="page" id="page-students">
         <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
           <div class="tabs" style="margin-bottom:0">
@@ -417,36 +418,58 @@ body{font-family:'Nunito',sans-serif;background:var(--sky);color:var(--ink);over
         </div>
       </div>
 
-      <!-- TUTORS PAGE (existing) -->
+      <!-- TUTORS PAGE -->
       <div class="page" id="page-tutors">
         <div class="g3"><div class="kpi ka"><div class="kpi-icon"><i class="fas fa-chalkboard-teacher"></i></div><div class="kpi-val" id="tutorCount">—</div><div class="kpi-lbl">Total Tutors</div></div><div class="kpi kgr"><div class="kpi-icon"><i class="fas fa-check-circle"></i></div><div class="kpi-val" id="tutorVerified">—</div><div class="kpi-lbl">Verified</div></div><div class="kpi kp"><div class="kpi-icon"><i class="fas fa-hourglass-half"></i></div><div class="kpi-val" id="tutorPending">—</div><div class="kpi-lbl">Pending Review</div></div></div>
         <div class="card"><div class="card-h"><div class="card-t"><i class="fas fa-users"></i> All Tutors</div></div><div class="card-b"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Tutor</th><th>Spec</th><th>County</th><th>Sessions</th><th>Students</th><th>Status</th><th>Actions</th></tr></thead><tbody id="tutorsTbl"></tbody></table></div></div></div>
       </div>
 
-      <!-- BELTS PAGE (existing) -->
+      <!-- DEVELOPER HUB PAGE -->
+      <div class="page" id="page-developer">
+        <div class="g3">
+          <div class="kpi kb"><div class="kpi-icon"><i class="fas fa-code"></i></div><div class="kpi-val" id="devTotal">0</div><div class="kpi-lbl">Total Projects</div></div>
+          <div class="kpi kgr"><div class="kpi-icon"><i class="fas fa-globe"></i></div><div class="kpi-val" id="devPublished">0</div><div class="kpi-lbl">Published</div></div>
+          <div class="kpi ka"><div class="kpi-icon"><i class="fas fa-file"></i></div><div class="kpi-val" id="devDrafts">0</div><div class="kpi-lbl">Drafts</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><div class="card-t"><i class="fas fa-folder-open"></i> All Developer Projects</div></div>
+          <div class="card-b">
+            <div class="tbl-wrap">
+              <table class="tbl">
+                <thead>
+                  <tr><th>#</th><th>Project</th><th>Student</th><th>Created</th><th>Updated</th><th>Status</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="devProjectsTbl"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BELTS PAGE -->
       <div class="page" id="page-belts">
         <div class="g3"><div class="kpi kgr"><div class="kpi-icon"><i class="fas fa-star"></i></div><div class="kpi-val" id="baTotalBelts">—</div><div class="kpi-lbl">Total Belts Awarded</div></div><div class="kpi kb"><div class="kpi-icon"><i class="fas fa-bullseye"></i></div><div class="kpi-val" id="baAvgAcc">—</div><div class="kpi-lbl">Avg Accuracy</div></div><div class="kpi kg"><div class="kpi-icon"><i class="fas fa-chart-simple"></i></div><div class="kpi-val" id="baSessions">—</div><div class="kpi-lbl">Total Sessions</div></div></div>
         <div class="card"><div class="card-h"><div class="card-t"><i class="fas fa-chart-bar"></i> Belt Performance</div></div><div class="card-b"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Belt</th><th>Tables</th><th>Passed</th><th>Pass Rate</th><th>Avg Accuracy</th><th>Avg Time</th></tr></thead><tbody id="beltTbl"></tbody></table></div></div></div>
         <div class="card"><div class="card-h"><div class="card-t"><i class="fas fa-funnel-dollar"></i> Belt Funnel</div></div><div class="card-b" id="beltFunnel"></div></div>
       </div>
 
-      <!-- KNOWLEDGE MAP PAGE (existing) -->
+      <!-- KNOWLEDGE MAP PAGE -->
       <div class="page" id="page-knowledge">
         <div class="g23"><div class="card"><div class="card-h"><div class="card-t"><i class="fas fa-globe"></i> Fact Heatmap</div></div><div class="card-b"><div id="heatmap" style="overflow-x:auto"></div></div></div>
           <div class="card"><div class="card-h"><div class="card-t"><i class="fas fa-skull"></i> Hardest Facts</div></div><div class="card-b"><table class="tbl"><thead><tr><th>#</th><th>Fact</th><th>Seen</th><th>Accuracy</th><th>Avg Time</th></tr></thead><tbody id="hardFacts"></tbody></table></div></div></div>
       </div>
 
-      <!-- TUTOR REQUESTS PAGE (existing) -->
+      <!-- TUTOR REQUESTS PAGE -->
       <div class="page" id="page-requests">
         <div class="card"><div class="card-h"><div class="card-t"><i class="fas fa-comments"></i> Tutor Requests</div></div><div class="card-b"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Student</th><th>Tutor</th><th>School</th><th>County</th><th>Status</th><th>Date</th></tr></thead><tbody id="requestsTbl"></tbody></table></div></div></div>
       </div>
 
-      <!-- TUTOR INTERESTS PAGE (existing) -->
+      <!-- TUTOR INTERESTS PAGE -->
       <div class="page" id="page-interests">
         <div class="card"><div class="card-h"><div class="card-t"><i class="fas fa-envelope"></i> Tutor Interests</div><div class="card-a" id="exportInterestsBtn">Export CSV</div></div><div class="card-b"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>Email</th><th>Submitted At</th><th>Actions</th></tr></thead><tbody id="interestsTbl"></tbody></table></div><div style="margin-top:12px;display:flex;justify-content:space-between"><span id="interestStats"></span><button class="qa-btn" id="clearAllInterestsBtn" style="background:var(--red-lt);color:var(--red);width:auto;padding:6px 14px"><i class="fas fa-trash"></i> Clear All</button></div></div></div>
       </div>
 
-      <!-- SETTINGS PAGE (existing) -->
+      <!-- SETTINGS PAGE -->
       <div class="page" id="page-settings">
         <div class="g2"><div class="card"><div class="card-h"><div class="card-t"><i class="fas fa-cog"></i> Settings</div></div><div class="card-b"><button class="qa-btn" id="paymentSettingsBtn"><i class="fas fa-credit-card"></i> Payment Settings</button><button class="qa-btn" id="beltSettingsBtn"><i class="fas fa-award"></i> Belt Settings</button><button class="qa-btn" id="badgeSettingsBtn"><i class="fas fa-medal"></i> Badge Settings</button><button class="qa-btn" id="emailSettingsBtn"><i class="fas fa-envelope"></i> Email Settings</button><button class="qa-btn" style="color:var(--red);border-color:rgba(229,57,53,.25)" id="signOutBtn"><i class="fas fa-sign-out-alt"></i> Sign Out</button></div></div>
           <div class="card"><div class="card-h"><div class="card-t"><i class="fas fa-server"></i> System Status</div></div><div class="card-b"><div id="sysStatus"></div></div></div></div>
@@ -477,6 +500,7 @@ let detectedQuestions = [];
 let selectedFile = null;
 let editingQuestionIndex = null;
 let currentStep = 1;
+let devProjects = [];
 
 async function api(method, path, body) {
   const opts = { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include' };
@@ -515,7 +539,8 @@ function navTo(page) {
     overview:'Dashboard', activity:'Live Activity', 
     create:'Create Assessment', library:'Content Library', bank:'Question Bank', 
     submissions:'Student Submissions', curriculum:'Curriculum Manager',
-    students:'Students', tutors:'Tutors', belts:'Belt Analytics', knowledge:'Knowledge Map', 
+    students:'Students', tutors:'Tutors', developer:'Developer Hub',
+    belts:'Belt Analytics', knowledge:'Knowledge Map', 
     requests:'Tutor Requests', interests:'Tutor Interests', settings:'Settings' 
   };
   document.getElementById('topTitle').innerHTML = titles[page] || page;
@@ -532,6 +557,7 @@ async function loadPage(page) {
   else if (page === 'curriculum') await loadCurriculumManager();
   else if (page === 'students') await loadStudents();
   else if (page === 'tutors') await loadTutors();
+  else if (page === 'developer') await loadDeveloperProjects();
   else if (page === 'belts') await loadBelts();
   else if (page === 'knowledge') await loadKnowledge();
   else if (page === 'requests') await loadRequests();
@@ -698,6 +724,56 @@ async function loadTutors() {
   `).join('') || '<tr><td colspan="7" class="empty">No tutors</td></tr>';
 }
 
+// ============ DEVELOPER PROJECTS FUNCTIONS ============
+async function loadDeveloperProjects() {
+  try {
+    // Fetch all DevProject objects via admin API
+    const r = await GET('/api/admin/developer/projects/');
+    if (r.error) {
+      console.error('Error loading developer projects:', r.error);
+      document.getElementById('devProjectsTbl').innerHTML = '<tr><td colspan="7" class="empty">Error loading projects</td></tr>';
+      return;
+    }
+    devProjects = r.projects || [];
+    document.getElementById('devCount').textContent = devProjects.length;
+    document.getElementById('devTotal').textContent = devProjects.length;
+    document.getElementById('devPublished').textContent = devProjects.filter(p => p.is_published).length;
+    document.getElementById('devDrafts').textContent = devProjects.filter(p => !p.is_published).length;
+    
+    document.getElementById('devProjectsTbl').innerHTML = devProjects.map((p, i) => `
+      <tr>
+        <td>${i+1}</td>
+        <td><strong>${escapeHtml(p.title)}</strong></td>
+        <td>${escapeHtml(p.user_name || 'Unknown')}</td>
+        <td style="font-size:11px">${formatDate(p.created_at)}</span></td>
+        <td style="font-size:11px">${formatDate(p.updated_at)}</span></td>
+        <td><span class="status-pill ${p.is_published ? 'sp-ok' : 'sp-draft'}">${p.is_published ? 'Published' : 'Draft'}</span></td>
+        <td>
+          ${p.is_published ? `<a href="${p.showcase_url}" target="_blank" class="qa-btn btn-sm" style="width:auto;background:var(--green-lt);color:var(--green-dk)"><i class="fas fa-external-link-alt"></i> View</a>` : ''}
+          <button onclick="deleteDevProject(${p.id})" class="qa-btn btn-sm" style="width:auto;background:var(--red-lt);color:var(--red)"><i class="fas fa-trash"></i> Delete</button>
+        </td>
+      </tr>
+    `).join('') || '<tr><td colspan="7" class="empty">No developer projects</td></tr>';
+    
+  } catch(e) {
+    console.error('Error loading developer projects:', e);
+    document.getElementById('devProjectsTbl').innerHTML = '<tr><td colspan="7" class="empty">Error loading projects</td></tr>';
+  }
+}
+
+async function deleteDevProject(projectId) {
+  if (!confirm('Delete this developer project? This cannot be undone.')) return;
+  try {
+    const r = await DELETE(`/api/admin/developer/project/${projectId}/delete/`);
+    if (r.error) { toast(r.error, 'var(--red)'); return; }
+    toast('Project deleted', 'var(--amber)');
+    loadDeveloperProjects();
+  } catch(e) {
+    toast('Error deleting project', 'var(--red)');
+  }
+}
+
+// ============ BELTS FUNCTIONS ============
 async function loadBelts() {
   const [ba, ov] = await Promise.all([GET('/api/admin/belts/'), GET('/api/admin/overview/')]);
   if (!ov.error) {
@@ -724,6 +800,7 @@ async function loadBelts() {
   `).join('');
 }
 
+// ============ KNOWLEDGE FUNCTIONS ============
 async function loadKnowledge() {
   const r = await GET('/api/admin/knowledge/');
   const factMap = {};
@@ -760,6 +837,7 @@ async function loadKnowledge() {
   `).join('') || '<tr><td colspan="5" class="empty">No data</td></tr>';
 }
 
+// ============ REQUESTS FUNCTIONS ============
 async function loadRequests() {
   const r = await GET('/api/admin/tutor-requests/');
   if (r.error) return;
@@ -776,6 +854,7 @@ async function loadRequests() {
   `).join('') || '<tr><td colspan="6" class="empty">No requests</td></tr>';
 }
 
+// ============ INTERESTS FUNCTIONS ============
 async function loadInterests() {
   const r = await GET('/api/admin/tutor-interests/');
   if (r.error) { console.error(r.error); return; }
@@ -976,15 +1055,12 @@ function openQuestionModal(index = null) {
       </div>
       <div><label style="font-weight:800">Marks</label><input type="number" id="marks" class="filter-select" style="width:100%" value="${q.marks || 1}"></div>
       <div><label style="font-weight:800">Explanation</label><textarea id="explanation" class="filter-select" style="width:100%;min-height:60px" placeholder="Explain why this answer is correct">${escapeHtml(q.explanation)}</textarea></div>
-      
-      <!-- NEW: Requires File Upload Checkbox -->
       <div style="display:flex;align-items:center;gap:12px;padding:8px;background:var(--amber-lt);border-radius:var(--r)">
         <input type="checkbox" id="requiresUpload" ${q.requires_upload ? 'checked' : ''} style="width:18px;height:18px">
         <label for="requiresUpload" style="font-weight:800;color:var(--amber);cursor:pointer">
           <i class="fas fa-paperclip"></i> Student must upload a working file to answer this question
         </label>
       </div>
-      
       <button class="qa-btn" style="background:var(--green);color:#fff;border:none" onclick="saveQuestion()">Save Question</button>
     </div>
   `;
@@ -1113,7 +1189,6 @@ async function loadContentLibrary() {
 
 async function loadSubmissions() {
   try {
-    // Get all quiz attempts with attachments
     const r = await GET('/api/admin/submissions/');
     if (r.error) {
       document.getElementById('submissionsList').innerHTML = '<div class="empty">Error loading submissions</div>';
@@ -1122,7 +1197,6 @@ async function loadSubmissions() {
     const submissions = r.submissions || [];
     document.getElementById('submissionsBadge').textContent = submissions.length;
     
-    // Populate filters
     const contentFilter = document.getElementById('submissionContentFilter');
     const studentFilter = document.getElementById('submissionStudentFilter');
     const uniqueContent = [...new Map(submissions.map(s => [s.content_id, {id: s.content_id, title: s.content_title}])).values()];
@@ -1133,7 +1207,6 @@ async function loadSubmissions() {
     
     renderSubmissionsList(submissions);
     
-    // Add filter listeners
     contentFilter.onchange = () => filterSubmissions(submissions);
     studentFilter.onchange = () => filterSubmissions(submissions);
     document.getElementById('submissionSearch').oninput = () => filterSubmissions(submissions);
@@ -1229,11 +1302,9 @@ window.viewSubmissionDetail = async function(attemptId) {
 };
 
 window.viewFile = function(url) {
-  // For web URLs, open in new tab
   if (url && (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/'))) {
     window.open(url, '_blank');
   } else {
-    // For file:// URLs or others, force download
     const a = document.createElement('a');
     a.href = url;
     a.download = '';
@@ -1252,7 +1323,6 @@ window.downloadFile = function(url, filename) {
 };
 
 window.viewContentSubmissions = async function(contentId) {
-  // Switch to submissions page and filter by this content
   navTo('submissions');
   setTimeout(() => {
     const filter = document.getElementById('submissionContentFilter');

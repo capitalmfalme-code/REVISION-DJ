@@ -5454,3 +5454,47 @@ def api_get_plans(request):
         }
         for plan in plans
     ]})    
+
+
+# =============================================================================
+# ADMIN DEVELOPER PROJECTS API
+# =============================================================================
+
+@require_GET
+@admin_only
+def api_admin_developer_projects(request):
+    """Get all developer projects for admin dashboard"""
+    from .models import DevProject
+    
+    projects = DevProject.objects.select_related('user').all().order_by('-updated_at')
+    
+    data = []
+    for p in projects:
+        data.append({
+            'id': p.id,
+            'title': p.title,
+            'slug': p.slug,
+            'user_name': p.user.get_full_name() or p.user.email,
+            'user_id': p.user.id,
+            'is_published': p.is_published,
+            'showcase_url': p.showcase_url,
+            'created_at': p.created_at.isoformat(),
+            'updated_at': p.updated_at.isoformat(),
+            'html_code': p.html_code[:100] if p.html_code else '',
+            'css_code': p.css_code[:100] if p.css_code else '',
+            'js_code': p.js_code[:100] if p.js_code else '',
+        })
+    
+    return ok(projects=data)
+
+
+@csrf_exempt
+@require_POST
+@admin_only
+def api_admin_developer_project_delete(request, project_id):
+    """Delete a developer project (admin only)"""
+    from .models import DevProject
+    
+    project = get_object_or_404(DevProject, id=project_id)
+    project.delete()
+    return ok(message="Project deleted successfully")

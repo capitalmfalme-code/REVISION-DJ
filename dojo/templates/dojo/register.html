@@ -28,6 +28,8 @@ body{font-family:'Nunito',sans-serif;background:linear-gradient(155deg,var(--nav
 .field-inp:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(25,118,210,.12)}
 select.field-inp{cursor:pointer}
 .field-hint{font-size:10px;color:var(--ink3);margin-top:5px;display:block}
+.field-hint.error-hint{color:var(--red);font-weight:700}
+.field-hint.success-hint{color:var(--green);font-weight:700}
 .btn{font-family:'Fredoka One',cursive;font-size:17px;border:none;cursor:pointer;padding:12px 26px;border-radius:var(--r2);display:inline-flex;align-items:center;justify-content:center;gap:7px;width:100%;transition:transform .13s,box-shadow .13s}
 .btn-gold{background:var(--gold);color:var(--navy);box-shadow:0 4px 0 var(--gold-dk)}
 .btn-gold:hover{transform:translateY(-2px);box-shadow:0 6px 0 var(--gold-dk)}
@@ -43,6 +45,9 @@ select.field-inp{cursor:pointer}
 .parent-info-box{background:linear-gradient(135deg, rgba(25,118,210,.05), rgba(255,193,7,.05));border-radius:var(--r2);padding:16px;margin-top:8px;margin-bottom:16px;border:2px dashed var(--sky2)}
 .parent-info-box p{font-size:12px;color:var(--ink2);margin-bottom:8px}
 .parent-info-box i{color:var(--gold);margin-right:6px}
+.email-match-error{background:rgba(229,57,53,.12);border:2px solid var(--red);border-radius:var(--r);padding:10px 14px;font-size:12px;font-weight:800;color:var(--red);margin-top:6px;display:none;align-items:center;gap:10px}
+.email-match-error.on{display:flex}
+.email-match-error i{font-size:16px}
 @media(max-width:480px){.field-row{grid-template-columns:1fr}}
 </style>
 </head>
@@ -60,7 +65,7 @@ select.field-inp{cursor:pointer}
       <div class="field-wrap"><label class="field-lbl">First Name <span class="required">*</span></label><input class="field-inp" id="regFirst" placeholder="Jane"></div>
       <div class="field-wrap"><label class="field-lbl">Last Name</label><input class="field-inp" id="regLast" placeholder="Smith"></div>
     </div>
-    <div class="field-wrap"><label class="field-lbl">Email <span class="required">*</span></label><input class="field-inp" id="regEmail" type="email" placeholder="jane@email.com"></div>
+    <div class="field-wrap"><label class="field-lbl">Student Email <span class="required">*</span></label><input class="field-inp" id="regEmail" type="email" placeholder="jane@email.com"></div>
     <div class="field-wrap"><label class="field-lbl">Password <span class="required">*</span></label><input class="field-inp" id="regPass" type="password" placeholder="Min 6 characters"></div>
     
     <div class="field-row">
@@ -93,7 +98,14 @@ select.field-inp{cursor:pointer}
     <div class="field-wrap">
       <label class="field-lbl">Parent/Guardian Email <span class="required">*</span></label>
       <input class="field-inp" id="regParentEmail" type="email" placeholder="parent@example.com">
-      <span class="field-hint"><i class="fas fa-envelope"></i> They'll receive login credentials via email</span>
+      
+      <!-- EMAIL MATCH ERROR - CLEAR MESSAGE -->
+      <div class="email-match-error" id="emailMatchError">
+        <i class="fas fa-exclamation-circle"></i>
+        <span>⚠️ <strong>Student email and parent email cannot be the same.</strong> Please use a different email address for your parent/guardian.</span>
+      </div>
+      
+      <span class="field-hint" id="parentEmailHint"><i class="fas fa-envelope"></i> They'll receive login credentials via email</span>
     </div>
     
     <div class="field-wrap">
@@ -125,6 +137,65 @@ function isValidPhone(phone) {
   return digits.length >= 10;
 }
 
+// Check if student and parent emails are the same - SHOW CLEAR ERROR
+function checkEmailMatch() {
+  const studentEmail = document.getElementById('regEmail').value.trim().toLowerCase();
+  const parentEmail = document.getElementById('regParentEmail').value.trim().toLowerCase();
+  const errorBox = document.getElementById('emailMatchError');
+  const hint = document.getElementById('parentEmailHint');
+  const submitBtn = document.getElementById('btnRegSubmit');
+  
+  // Only show error if both fields have values
+  if (studentEmail && parentEmail) {
+    if (studentEmail === parentEmail) {
+      // EMAILS MATCH - SHOW ERROR, DISABLE SUBMIT
+      errorBox.classList.add('on');
+      hint.textContent = '❌ Parent email cannot be the same as student email. Please change it.';
+      hint.classList.add('error-hint');
+      hint.classList.remove('success-hint');
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.6';
+      submitBtn.style.cursor = 'not-allowed';
+      return true;
+    } else if (isValidEmail(parentEmail)) {
+      // EMAILS ARE DIFFERENT AND VALID - HIDE ERROR, ENABLE SUBMIT
+      errorBox.classList.remove('on');
+      hint.textContent = '✓ Valid parent email address (different from student email)';
+      hint.classList.add('success-hint');
+      hint.classList.remove('error-hint');
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = '1';
+      submitBtn.style.cursor = 'pointer';
+      return false;
+    } else {
+      // Parent email is invalid
+      errorBox.classList.remove('on');
+      hint.textContent = '⚠️ Please enter a valid email address';
+      hint.classList.add('error-hint');
+      hint.classList.remove('success-hint');
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.6';
+      submitBtn.style.cursor = 'not-allowed';
+      return false;
+    }
+  } else {
+    // One or both fields empty
+    errorBox.classList.remove('on');
+    if (parentEmail && !isValidEmail(parentEmail)) {
+      hint.textContent = '⚠️ Please enter a valid email address';
+      hint.classList.add('error-hint');
+      hint.classList.remove('success-hint');
+    } else {
+      hint.textContent = '📧 Parent will receive login credentials via email';
+      hint.classList.remove('error-hint', 'success-hint');
+    }
+    submitBtn.disabled = false;
+    submitBtn.style.opacity = '1';
+    submitBtn.style.cursor = 'pointer';
+    return false;
+  }
+}
+
 // Show toast message
 function showToast(message, type) {
   const toast = document.createElement('div');
@@ -148,6 +219,24 @@ function showToast(message, type) {
     setTimeout(() => toast.remove(), 300);
   }, 3000);
 }
+
+// Real-time email validation - check on every keystroke
+document.getElementById('regEmail').addEventListener('input', function() {
+  checkEmailMatch();
+});
+
+document.getElementById('regParentEmail').addEventListener('input', function() {
+  checkEmailMatch();
+});
+
+// Also check when leaving the field
+document.getElementById('regEmail').addEventListener('blur', function() {
+  checkEmailMatch();
+});
+
+document.getElementById('regParentEmail').addEventListener('blur', function() {
+  checkEmailMatch();
+});
 
 // Form submission
 document.getElementById('btnRegSubmit').addEventListener('click', async () => {
@@ -213,6 +302,15 @@ document.getElementById('btnRegSubmit').addEventListener('click', async () => {
     errDiv.textContent = 'Please enter a valid parent/guardian email address';
     errDiv.classList.add('on');
     showToast('Please enter a valid parent/guardian email address', 'error');
+    return;
+  }
+  
+  // 🔴 CRITICAL: Check that student and parent emails are NOT the same
+  if (email.toLowerCase() === parentEmail.toLowerCase()) {
+    errDiv.textContent = '❌ Student email and parent email cannot be the same. Please use a different email for your parent/guardian.';
+    errDiv.classList.add('on');
+    document.getElementById('emailMatchError').classList.add('on');
+    showToast('Student and parent email cannot be the same', 'error');
     return;
   }
   
@@ -294,7 +392,11 @@ inputs.forEach(id => {
     input.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        document.getElementById('btnRegSubmit').click();
+        // Check if submit is disabled before clicking
+        const submitBtn = document.getElementById('btnRegSubmit');
+        if (!submitBtn.disabled) {
+          submitBtn.click();
+        }
       }
     });
   }
@@ -317,6 +419,9 @@ if (phoneInput) {
 
 // Auto-focus first field on page load
 document.getElementById('regFirst')?.focus();
+
+// Initialize email check on page load
+checkEmailMatch();
 </script>
 </body>
 </html>

@@ -13,6 +13,18 @@ urlpatterns = [
     path("parent-login/", views.ParentLoginView.as_view(), name="parent_login"),
     path("game/", views.StudentAppView.as_view(), name="game"),
     path("tutor/", views.TutorDashboardView.as_view(), name="tutor_dashboard"),
+
+    # ── DEVELOPER HUB (students only) ────────────────────────────────────────
+    path("developer/", developer_views.DeveloperHubView.as_view(), name="developer_hub"),
+    path("developer/projects/", developer_views.DeveloperProjectListView.as_view(), name="developer_projects"),
+    path("developer/project/new/", developer_views.DeveloperProjectCreateView.as_view(), name="developer_project_new"),
+    path("developer/project/<int:project_id>/", developer_views.DeveloperProjectEditorView.as_view(), name="developer_editor"),
+    path("developer/project/<int:project_id>/save/", developer_views.api_developer_project_save, name="developer_project_save"),
+    path("developer/project/<int:project_id>/publish/", developer_views.api_developer_project_publish, name="developer_project_publish"),
+    path("developer/project/<int:project_id>/upload/", developer_views.api_developer_project_upload, name="developer_project_upload"),
+    path("developer/project/<int:project_id>/delete/", developer_views.DeveloperProjectDeleteView.as_view(), name="developer_project_delete"),
+    path("showcase/<slug:slug>/", developer_views.DeveloperShowcaseView.as_view(), name="developer_showcase"),
+
     
     # ── PASSWORD RESET PAGES ───────────────────────────────────────────────────
     path("password-reset/", views.password_reset_page, name="password_reset"),
@@ -37,17 +49,6 @@ urlpatterns = [
     
     # ── PARENT DASHBOARD ──────────────────────────────────────────────────────
     path("parent-dashboard/", views.ParentDashboardView.as_view(), name="parent_dashboard"),
-    
-    # ─── DEVELOPER HUB ────────────────────────────────────────────────────────
-    path("developer/", developer_views.DeveloperHubView.as_view(), name="developer_hub"),
-    path("developer/projects/", developer_views.DeveloperProjectListView.as_view(), name="developer_projects"),
-    path("developer/project/new/", developer_views.DeveloperProjectCreateView.as_view(), name="developer_project_new"),
-    path("developer/project/<int:project_id>/", developer_views.DeveloperProjectEditorView.as_view(), name="developer_editor"),
-    path("developer/project/<int:project_id>/save/", developer_views.api_developer_project_save, name="developer_project_save"),
-    path("developer/project/<int:project_id>/publish/", developer_views.api_developer_project_publish, name="developer_project_publish"),
-    path("developer/project/<int:project_id>/upload/", developer_views.api_developer_project_upload, name="developer_project_upload"),
-    path("developer/project/<int:project_id>/delete/", developer_views.DeveloperProjectDeleteView.as_view(), name="developer_project_delete"),
-    path("showcase/<slug:slug>/", developer_views.DeveloperShowcaseView.as_view(), name="developer_showcase"),
     
     # ── PUBLIC API ─────────────────────────────────────────────────────────
     path("api/public/stats/", views.api_public_stats, name="api-public-stats"),
@@ -93,22 +94,28 @@ urlpatterns = [
     path("api/tutor/requests/", views.api_tutor_requests, name="api-tutor-requests"),
     path("api/tutor/request/update/", views.api_tutor_request_update, name="api-tutor-request-update"),
     
-    # ── SUBSCRIPTION & PAYMENT API ───────────────────────────────────────────
+    # ── SUBSCRIPTION & PAYMENT API (NEW - REPLACES OLD PAYMENT API) ─────────────
+    # Subscription status and management
     path("api/subscription/status/", views.api_subscription_status, name="api-subscription-status"),
     path("api/subscription/initiate/", views.api_initiate_subscription, name="api-initiate-subscription"),
     path("api/subscription/cancel/", views.api_cancel_subscription, name="api-cancel-subscription"),
     path("api/payment/history/", views.api_payment_history, name="api-payment-history"),
     path("api/payment/webhook/", views.api_subscription_webhook, name="api-subscription-webhook"),
+    
+    # Access checks
     path("api/curriculum/access/", views.api_check_curriculum_access, name="api-curriculum-access"),
     path("api/subscription/check-belt/<str:belt_id>/", views.api_check_belt_access, name="api-check-belt-access"),
-    path("api/payment/verify/", views.api_verify_payment, name="api-payment-verify"),
-    path("api/payment/plans/", views.api_get_plans, name="api-payment-plans"),
     
+    # Payment verification
+    path("api/payment/verify/", views.api_verify_payment, name="api-payment-verify"),
     path("payment/verify/", views.payment_verify_view, name="payment-verify"),
     path("payment/subscription/verify/", views.api_verify_subscription, name="payment-subscription-verify"),
     path("payment/upgrade/", views.payment_modal_view, name="payment-upgrade"),
     path("payment/success/", views.payment_verify_view, name="payment-success"),
     path("payment/failed/", views.payment_verify_view, name="payment-failed"),
+    
+    # Get plans (keep for compatibility)
+    path("api/payment/plans/", views.api_get_plans, name="api-payment-plans"),
     
     # ── ADMIN API ─────────────────────────────────────────────────────────────
     path("api/admin/login/", views.api_admin_login, name="api-admin-login"),
@@ -129,6 +136,7 @@ urlpatterns = [
     path("api/student/assignments/", views.api_student_assignments, name="api-student-assignments"),
     path("api/student/assignments/<int:assignment_id>/", views.api_student_assignment_detail, name="api-student-assignment-detail"),
     path("api/student/assignments/<int:assignment_id>/submit/", views.api_student_submit_assignment, name="api-student-submit-assignment"),
+    
     path("api/tutor/assignments/", views.api_tutor_assignments, name="api-tutor-assignments"),
     path("api/tutor/assignments/create/", views.api_tutor_create_assignment, name="api-tutor-create-assignment"),
     path("api/tutor/assignments/<int:assignment_id>/submissions/", views.api_tutor_submissions, name="api-tutor-submissions"),
@@ -141,6 +149,8 @@ urlpatterns = [
     path("api/tutor/chat/list/", views.api_tutor_chat_list, name="api-tutor-chat-list"),
     path("api/chat/send/", views.api_send_chat, name="api-send-chat"),
     path("api/chat/upload/", views.api_chat_upload_file, name="api-chat-upload"),
+    
+    # Video call endpoints
     path("api/chat/start-call/", views.api_start_video_call, name="api-start-call"),
     path("api/chat/end-call/", views.api_end_video_call, name="api-end-call"),
     path("video-call/<str:room_name>/", views.video_call_view, name="video-call"),
@@ -238,8 +248,4 @@ urlpatterns = [
     path('api/admin/attachments/content/<int:content_id>/', views.api_admin_list_attachments, name='api_admin_attachments_by_content'),
     path('api/attachment/<int:attachment_id>/', views.api_serve_attachment, name='api_serve_attachment'),
     path('api/submission/<int:attempt_id>/file/<int:question_index>/', views.api_download_submission_file, name='api_download_submission_file'),
-
-    # Developer Projects (Admin)
-    path("api/admin/developer/projects/", views.api_admin_developer_projects, name="api-admin-developer-projects"),
-    path("api/admin/developer/project/<int:project_id>/delete/", views.api_admin_developer_project_delete, name="api-admin-developer-project-delete"),
 ]

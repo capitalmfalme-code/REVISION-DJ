@@ -1,0 +1,407 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,viewport-fit=cover">
+<title>{{ project.title }} — Developer Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+:root{
+  --sky:#eef6ff;--sky2:#d0e8fa;--sky3:#b8d8f5;
+  --white:#fff;--ink:#1a2638;--ink2:#3b4d63;--ink3:#7088a0;
+  --gold:#ffc107;--gold2:#ffd740;--gold-dk:#e6a800;
+  --navy:#1a3a6b;--navy2:#234d96;
+  --blue:#1976d2;--blue2:#42a5f5;
+  --green:#00b248;--green2:#33d17a;--green-dk:#008f3a;
+  --red:#e53935;--amber:#f57c00;--purple:#7b1fa2;
+  --r:10px;--r2:16px;--r3:24px;
+  --sh:0 2px 12px rgba(26,58,107,.10);
+  --sh2:0 4px 24px rgba(26,58,107,.16);
+  --sh3:0 8px 40px rgba(26,58,107,.20);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:'Nunito',sans-serif;background:var(--sky);color:var(--ink);overflow:hidden}
+.editor-shell{display:flex;flex-direction:column;height:100vh}
+
+.top-nav{background:var(--navy);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 4px 20px rgba(0,0,0,.15);flex-wrap:wrap}
+.tn-left{display:flex;align-items:center;gap:14px;min-width:0}
+.tn-back{font-size:13px;font-weight:700;color:rgba(255,255,255,.8);cursor:pointer;display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:var(--r);transition:all .2s;text-decoration:none;flex-shrink:0}
+.tn-back:hover{color:#fff;background:rgba(255,255,255,.1)}
+#titleInput{background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.18);color:#fff;font-family:'Fredoka One',cursive;font-size:15px;padding:8px 14px;border-radius:var(--r);min-width:160px;max-width:280px}
+#titleInput:focus{outline:none;border-color:var(--gold)}
+.tn-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.tn-btn{border:none;padding:9px 16px;border-radius:99px;font-family:'Fredoka One',cursive;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .2s;white-space:nowrap}
+.tn-btn-save{background:rgba(255,255,255,.15);color:#fff}
+.tn-btn-save:hover{background:rgba(255,255,255,.25)}
+.tn-btn-publish{background:var(--gold);color:var(--navy)}
+.tn-btn-publish:hover{background:var(--gold2);transform:translateY(-1px)}
+.tn-btn-publish.published{background:var(--green2);color:#024d20}
+.save-status{font-size:11px;color:rgba(255,255,255,.6);font-weight:600;white-space:nowrap}
+
+.tabs-bar{background:#fff;border-bottom:1px solid var(--sky2);display:flex;align-items:center;padding:0 16px;gap:4px}
+.code-tab{padding:11px 18px;font-size:13px;font-weight:700;color:var(--ink3);cursor:pointer;border-bottom:3px solid transparent;display:flex;align-items:center;gap:7px;transition:all .15s}
+.code-tab i.fa-html5{color:#e34c26}
+.code-tab i.fa-css3-alt{color:#264de4}
+.code-tab i.fa-js{color:#f0db4f}
+.code-tab.active{color:var(--navy);border-bottom-color:var(--gold)}
+.code-tab:hover:not(.active){color:var(--navy2);background:var(--sky)}
+.view-toggle{display:none;margin-left:auto;gap:4px}
+.view-toggle button{background:var(--sky);border:1px solid var(--sky2);padding:7px 14px;border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;color:var(--ink2)}
+.view-toggle button.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+.workspace{flex:1;display:flex;min-height:0}
+.editor-pane{flex:1;display:flex;flex-direction:column;min-width:0;border-right:1px solid var(--sky2)}
+.editor-container{flex:1;min-height:0;position:relative}
+.monaco-box{position:absolute;inset:0;display:none}
+.monaco-box.active{display:block}
+
+.assets-panel{background:#fff;border-top:1px solid var(--sky2);padding:10px 14px;max-height:130px;overflow-y:auto;flex-shrink:0}
+.assets-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.assets-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);display:flex;align-items:center;gap:6px}
+.upload-btn{background:var(--sky);border:1.5px dashed var(--sky3);color:var(--navy2);padding:6px 14px;border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.upload-btn:hover{background:var(--sky2)}
+.assets-row{display:flex;gap:10px;flex-wrap:wrap}
+.asset-chip{display:flex;align-items:center;gap:8px;background:var(--sky);border:1px solid var(--sky2);border-radius:var(--r);padding:5px 6px;font-size:11px}
+.asset-chip img{width:28px;height:28px;object-fit:cover;border-radius:5px;background:#fff}
+.asset-chip .asset-name{max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2);font-weight:600}
+.asset-chip button{background:none;border:none;cursor:pointer;color:var(--navy2);font-size:11px;padding:3px 6px;border-radius:6px}
+.asset-chip button:hover{background:var(--sky2)}
+.assets-empty{font-size:11px;color:var(--ink3);padding:6px 0}
+
+.preview-pane{flex:1;display:flex;flex-direction:column;min-width:0;background:#fff}
+.preview-bar{padding:9px 14px;border-bottom:1px solid var(--sky2);display:flex;align-items:center;justify-content:space-between}
+.preview-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);display:flex;align-items:center;gap:6px}
+.preview-refresh{background:var(--sky);border:1px solid var(--sky2);color:var(--navy2);padding:6px 12px;border-radius:99px;font-size:11px;font-weight:700;cursor:pointer}
+.preview-refresh:hover{background:var(--sky2)}
+#previewFrame{flex:1;border:none;width:100%;background:#fff}
+
+@media(max-width:860px){
+  #titleInput{max-width:120px}
+  .save-status{display:none}
+  .view-toggle{display:flex}
+  .preview-pane{display:none}
+  .preview-pane.mobile-active{display:flex;position:fixed;inset:54px 0 0 0;z-index:50}
+  .editor-pane.mobile-hidden{display:none}
+}
+
+.modal{position:fixed;inset:0;background:rgba(26,38,56,.6);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.modal.on{display:flex}
+.modal-content{background:#fff;border-radius:var(--r2);padding:24px;max-width:440px;width:100%;box-shadow:var(--sh3)}
+.modal-title{font-family:'Fredoka One',cursive;font-size:17px;color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.modal-title i{color:var(--green)}
+.modal-text{font-size:13px;color:var(--ink2);margin-bottom:16px}
+.link-row{display:flex;gap:8px;margin-bottom:16px}
+.link-row input{flex:1;padding:10px;border:1.5px solid var(--sky2);border-radius:var(--r);font-size:12px;color:var(--navy2);background:var(--sky)}
+.link-row button{background:var(--navy);color:#fff;border:none;padding:0 16px;border-radius:var(--r);font-size:12px;font-weight:700;cursor:pointer}
+.modal-actions{display:flex;gap:10px}
+.modal-actions button, .modal-actions a{flex:1;padding:11px;border-radius:var(--r);font-weight:700;font-size:13px;cursor:pointer;border:none;text-align:center;text-decoration:none;display:block}
+.modal-cancel{background:var(--sky);color:var(--ink2)}
+.modal-confirm{background:var(--gold);color:var(--navy)}
+
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:2000;background:var(--navy);color:#fff;padding:8px 20px;border-radius:99px;font-family:'Fredoka One',cursive;font-size:12px;opacity:0;transition:opacity .25s;box-shadow:var(--sh2);white-space:nowrap}
+#toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<div class="editor-shell">
+  <div class="top-nav">
+    <div class="tn-left">
+      <a href="{% url 'dojo:developer_projects' %}" class="tn-back"><i class="fas fa-arrow-left"></i></a>
+      <input type="text" id="titleInput" value="{{ project.title }}" maxlength="150">
+    </div>
+    <div class="tn-right">
+      <span class="save-status" id="saveStatus">Saved {{ project.updated_at|timesince }} ago</span>
+      <button class="tn-btn tn-btn-save" id="saveBtn"><i class="fas fa-save"></i> Save</button>
+      <button class="tn-btn tn-btn-publish {% if project.is_published %}published{% endif %}" id="publishBtn">
+        {% if project.is_published %}<i class="fas fa-check-circle"></i> Published{% else %}<i class="fas fa-rocket"></i> Publish{% endif %}
+      </button>
+    </div>
+  </div>
+
+  <div class="tabs-bar">
+    <div class="code-tab active" data-tab="html"><i class="fab fa-html5"></i> HTML</div>
+    <div class="code-tab" data-tab="css"><i class="fab fa-css3-alt"></i> CSS</div>
+    <div class="code-tab" data-tab="js"><i class="fab fa-js"></i> JavaScript</div>
+    <div class="view-toggle" id="viewToggle">
+      <button class="active" data-view="code"><i class="fas fa-code"></i> Code</button>
+      <button data-view="preview"><i class="fas fa-eye"></i> Preview</button>
+    </div>
+  </div>
+
+  <div class="workspace">
+    <div class="editor-pane" id="editorPane">
+      <div class="editor-container">
+        <div class="monaco-box active" id="boxHtml"></div>
+        <div class="monaco-box" id="boxCss"></div>
+        <div class="monaco-box" id="boxJs"></div>
+      </div>
+      <div class="assets-panel">
+        <div class="assets-header">
+          <div class="assets-title"><i class="fas fa-images"></i> Assets</div>
+          <label class="upload-btn">
+            <i class="fas fa-upload"></i> Upload Image
+            <input type="file" id="assetInput" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp,image/svg+xml" style="display:none">
+          </label>
+        </div>
+        <div class="assets-row" id="assetsRow">
+          {% for asset in project.assets.all %}
+          <div class="asset-chip" data-url="{{ asset.file.url }}">
+            <img src="{{ asset.file.url }}" alt="">
+            <span class="asset-name">{{ asset.original_filename }}</span>
+            <button onclick="insertAsset('{{ asset.file.url }}')" title="Insert into HTML"><i class="fas fa-plus"></i></button>
+            <button onclick="copyAssetUrl('{{ asset.file.url }}')" title="Copy URL"><i class="fas fa-copy"></i></button>
+          </div>
+          {% empty %}
+          <span class="assets-empty" id="assetsEmpty">No images uploaded yet.</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-pane" id="previewPane">
+      <div class="preview-bar">
+        <div class="preview-label"><i class="fas fa-eye"></i> Live Preview</div>
+        <button class="preview-refresh" id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh</button>
+      </div>
+      <iframe id="previewFrame" sandbox="allow-scripts allow-forms allow-modals allow-popups"></iframe>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="publishModal">
+  <div class="modal-content">
+    <div class="modal-title"><i class="fas fa-check-circle"></i> Project Published!</div>
+    <div class="modal-text">Anyone with this link can now view your project:</div>
+    <div class="link-row">
+      <input type="text" id="publishLink" readonly>
+      <button onclick="copyPublishLink()"><i class="fas fa-copy"></i></button>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closePublishModal()">Close</button>
+      <a class="modal-confirm" id="viewLiveLink" href="#" target="_blank">View Live</a>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="{% static 'dojo/js/csrf.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.js"></script>
+<script>
+(function(){
+  'use strict';
+
+  const PROJECT_ID = {{ project.id }};
+  const initialHtml = "{{ project.html_code|escapejs }}";
+  const initialCss = "{{ project.css_code|escapejs }}";
+  const initialJs = "{{ project.js_code|escapejs }}";
+  let isPublished = {% if project.is_published %}true{% else %}false{% endif %};
+  let showcaseUrl = {% if project.showcase_url %}"{{ project.showcase_url }}"{% else %}null{% endif %};
+
+  async function api(method, path, body, isFormData=false){
+    let opts = { method, credentials: 'include' };
+    if(!isFormData){
+      opts.headers = { 'Content-Type': 'application/json' };
+      if(body) opts.body = JSON.stringify(body);
+    } else {
+      opts.body = body;
+    }
+    try{
+      let r = await fetch(path, opts);
+      return await r.json();
+    } catch(e){
+      console.error('API error:', e);
+      return { error: 'Network error' };
+    }
+  }
+  let POST = (p, b) => api('POST', p, b);
+  let POST_FORM = (p, b) => api('POST', p, b, true);
+
+  function toast(msg, bg='var(--navy)'){
+    let t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.background = bg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  let htmlEditor, cssEditor, jsEditor;
+  let previewTimer = null;
+
+  function updatePreview(){
+    clearTimeout(previewTimer);
+    previewTimer = setTimeout(() => {
+      const html = htmlEditor.getValue();
+      const css = cssEditor.getValue();
+      const js = jsEditor.getValue();
+      const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${css}</style></head><body>${html}<script>${js}<\/script></body></html>`;
+      const frame = document.getElementById('previewFrame');
+      frame.srcdoc = doc;
+    }, 350);
+  }
+
+  require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
+  require(['vs/editor/editor.main'], function(){
+    htmlEditor = monaco.editor.create(document.getElementById('boxHtml'), {
+      value: initialHtml, language: 'html', theme: 'vs', fontSize: 13, minimap: { enabled: false }, automaticLayout: true, wordWrap: 'on'
+    });
+    cssEditor = monaco.editor.create(document.getElementById('boxCss'), {
+      value: initialCss, language: 'css', theme: 'vs', fontSize: 13, minimap: { enabled: false }, automaticLayout: true, wordWrap: 'on'
+    });
+    jsEditor = monaco.editor.create(document.getElementById('boxJs'), {
+      value: initialJs, language: 'javascript', theme: 'vs', fontSize: 13, minimap: { enabled: false }, automaticLayout: true, wordWrap: 'on'
+    });
+
+    htmlEditor.onDidChangeModelContent(updatePreview);
+    cssEditor.onDidChangeModelContent(updatePreview);
+    jsEditor.onDidChangeModelContent(updatePreview);
+
+    updatePreview();
+  });
+
+  // Tabs
+  const boxes = { html: 'boxHtml', css: 'boxCss', js: 'boxJs' };
+  document.querySelectorAll('.code-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      Object.values(boxes).forEach(id => document.getElementById(id).classList.remove('active'));
+      document.getElementById(boxes[tab.dataset.tab]).classList.add('active');
+      setTimeout(() => {
+        if(tab.dataset.tab === 'html' && htmlEditor) htmlEditor.layout();
+        if(tab.dataset.tab === 'css' && cssEditor) cssEditor.layout();
+        if(tab.dataset.tab === 'js' && jsEditor) jsEditor.layout();
+      }, 0);
+    });
+  });
+
+  // Mobile code/preview toggle
+  document.querySelectorAll('.view-toggle button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.view-toggle button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const editorPane = document.getElementById('editorPane');
+      const previewPane = document.getElementById('previewPane');
+      if(btn.dataset.view === 'preview'){
+        editorPane.classList.add('mobile-hidden');
+        previewPane.classList.add('mobile-active');
+      } else {
+        editorPane.classList.remove('mobile-hidden');
+        previewPane.classList.remove('mobile-active');
+      }
+    });
+  });
+
+  document.getElementById('refreshBtn').addEventListener('click', updatePreview);
+
+  // Save
+  async function saveProject(){
+    const r = await POST(`/developer/project/${PROJECT_ID}/save/`, {
+      title: document.getElementById('titleInput').value,
+      html_code: htmlEditor.getValue(),
+      css_code: cssEditor.getValue(),
+      js_code: jsEditor.getValue(),
+    });
+    if(r.ok){
+      document.getElementById('saveStatus').textContent = 'Saved just now';
+      toast('Project saved!', 'var(--green)');
+    } else {
+      toast(r.error || 'Could not save project', 'var(--red)');
+    }
+  }
+  document.getElementById('saveBtn').addEventListener('click', saveProject);
+  document.addEventListener('keydown', (e) => {
+    if((e.ctrlKey || e.metaKey) && e.key === 's'){
+      e.preventDefault();
+      saveProject();
+    }
+  });
+
+  // Publish / Unpublish
+  document.getElementById('publishBtn').addEventListener('click', async () => {
+    await saveProject();
+    const action = isPublished ? 'unpublish' : 'publish';
+    const r = await POST(`/developer/project/${PROJECT_ID}/publish/`, { action });
+    if(r.ok){
+      isPublished = r.project.is_published;
+      showcaseUrl = r.project.showcase_url;
+      const btn = document.getElementById('publishBtn');
+      if(isPublished){
+        btn.classList.add('published');
+        btn.innerHTML = '<i class="fas fa-check-circle"></i> Published';
+        document.getElementById('publishLink').value = window.location.origin + showcaseUrl;
+        document.getElementById('viewLiveLink').href = showcaseUrl;
+        document.getElementById('publishModal').classList.add('on');
+      } else {
+        btn.classList.remove('published');
+        btn.innerHTML = '<i class="fas fa-rocket"></i> Publish';
+        toast('Project unpublished');
+      }
+    } else {
+      toast(r.error || 'Could not update publish status', 'var(--red)');
+    }
+  });
+  window.closePublishModal = function(){ document.getElementById('publishModal').classList.remove('on'); };
+  window.copyPublishLink = function(){
+    const input = document.getElementById('publishLink');
+    input.select();
+    navigator.clipboard?.writeText(input.value);
+    toast('Link copied!', 'var(--green)');
+  };
+
+  // Asset upload
+  document.getElementById('assetInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const fd = new FormData();
+    fd.append('file', file);
+    toast('Uploading...', 'var(--blue)');
+    const r = await POST_FORM(`/developer/project/${PROJECT_ID}/upload/`, fd);
+    if(r.ok){
+      const row = document.getElementById('assetsRow');
+      document.getElementById('assetsEmpty')?.remove();
+      const chip = document.createElement('div');
+      chip.className = 'asset-chip';
+      chip.dataset.url = r.url;
+      chip.innerHTML = `<img src="${r.url}" alt=""><span class="asset-name">${r.name}</span>
+        <button onclick="insertAsset('${r.url}')" title="Insert into HTML"><i class="fas fa-plus"></i></button>
+        <button onclick="copyAssetUrl('${r.url}')" title="Copy URL"><i class="fas fa-copy"></i></button>`;
+      row.appendChild(chip);
+      toast('Image uploaded!', 'var(--green)');
+    } else {
+      toast(r.error || 'Upload failed', 'var(--red)');
+    }
+    e.target.value = '';
+  });
+
+  window.insertAsset = function(url){
+    document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector('.code-tab[data-tab="html"]').classList.add('active');
+    Object.values(boxes).forEach(id => document.getElementById(id).classList.remove('active'));
+    document.getElementById('boxHtml').classList.add('active');
+    setTimeout(() => {
+      htmlEditor.layout();
+      htmlEditor.focus();
+      const selection = htmlEditor.getSelection();
+      const tag = `<img src="${url}" alt="">`;
+      htmlEditor.executeEdits('insert-asset', [{ range: selection, text: tag, forceMoveMarkers: true }]);
+    }, 0);
+  };
+  window.copyAssetUrl = function(url){
+    navigator.clipboard?.writeText(window.location.origin + url);
+    toast('Image URL copied!', 'var(--green)');
+  };
+
+  async function loadProfile(){
+    const r = await api('GET', '/api/me/');
+    if(r.error) window.location.href = '/login/';
+  }
+  loadProfile();
+})();
+</script>
+</body>
+</html>

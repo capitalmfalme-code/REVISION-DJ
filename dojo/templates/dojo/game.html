@@ -69,6 +69,10 @@ select.field-inp{cursor:pointer}
 .tn-name{font-size:12px;font-weight:800;color:#fff}
 .tn-logout{font-size:12px;font-weight:800;color:rgba(255,255,255,0.7);cursor:pointer;padding:5px 8px;transition:color .15s;display:flex;align-items:center;gap:6px}
 .tn-logout:hover{color:#fff}
+/* ── NEW DEVELOPER HUB BUTTON ── */
+.dev-hub-btn{background:rgba(255,193,7,.15);border:1px solid var(--gold);border-radius:99px;padding:5px 14px;display:flex;align-items:center;gap:7px;cursor:pointer;transition:all .2s;color:#fff;font-size:12px;font-weight:800}
+.dev-hub-btn:hover{background:rgba(255,193,7,.3);transform:translateY(-1px);box-shadow:0 2px 8px rgba(255,193,7,.2)}
+.dev-hub-btn i{color:var(--gold)}
 .mute-btn{background:rgba(255,255,255,.12);border:none;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:16px;transition:background .15s;flex-shrink:0}
 .mute-btn:hover{background:rgba(255,255,255,.25)}
 .tn-right{display:flex;align-items:center;gap:8px}
@@ -82,6 +86,7 @@ select.field-inp{cursor:pointer}
   .tn-right .billing-btn { display: none; }
   .tn-right .tn-logout { display: none; }
   .tn-right .parent-portal-link { display: none; }
+  .tn-right .dev-hub-btn .dev-label { display: none; }
   .menu-toggle { display: flex; }
   .hbody { padding-bottom: 120px; }
   .stats-row { gap: 6px; }
@@ -396,6 +401,13 @@ select.field-inp{cursor:pointer}
       <a href="{% url 'dojo:parent_login' %}" class="parent-portal-link"><i class="fas fa-users"></i> Parent Portal</a>
       <button class="mute-btn" id="muteBtn"><i class="fas fa-volume-up"></i></button>
       <button class="billing-btn" id="billingBtn"><i class="fas fa-credit-card"></i> Upgrade</button>
+      
+      <!-- ─── DEVELOPER HUB BUTTON ─── -->
+      <div class="dev-hub-btn" id="devHubBtn" onclick="window.location.href='/developer/'">
+        <i class="fas fa-code"></i>
+        <span class="dev-label">Developer Hub</span>
+      </div>
+      
       <div class="tn-pill" id="profileBtn">
         <div class="tn-avatar" id="tnAvatar">S</div>
         <div class="tn-name" id="tnName">Student</div>
@@ -407,6 +419,10 @@ select.field-inp{cursor:pointer}
   
   <!-- Mobile Menu -->
   <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-item" id="mobileDevHubBtn" onclick="window.location.href='/developer/'">
+      <i class="fas fa-code"></i>
+      <span>Developer Hub</span>
+    </div>
     <div class="mobile-menu-item" id="mobileParentPortalBtn">
       <i class="fas fa-users"></i>
       <span>Parent Portal</span>
@@ -918,7 +934,7 @@ select.field-inp{cursor:pointer}
     });
   }
 
-  /* ══ SESSION ENGINE (abbreviated for brevity - same as original) ══ */
+  /* ══ SESSION ENGINE ══ */
   var SES = null;
   var clockInterval = null;
   var _factBuffer = [];

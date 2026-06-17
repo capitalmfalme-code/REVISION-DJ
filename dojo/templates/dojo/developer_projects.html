@@ -1,0 +1,287 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,viewport-fit=cover">
+<title>My Projects — Developer Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+:root{
+  --sky:#eef6ff;--sky2:#d0e8fa;--sky3:#b8d8f5;
+  --white:#fff;--ink:#1a2638;--ink2:#3b4d63;--ink3:#7088a0;
+  --gold:#ffc107;--gold2:#ffd740;--gold-dk:#e6a800;
+  --navy:#1a3a6b;--navy2:#234d96;
+  --blue:#1976d2;--blue2:#42a5f5;
+  --green:#00b248;--green2:#33d17a;--green-dk:#008f3a;
+  --red:#e53935;--amber:#f57c00;--purple:#7b1fa2;
+  --r:10px;--r2:16px;--r3:24px;
+  --sh:0 2px 12px rgba(26,58,107,.10);
+  --sh2:0 4px 24px rgba(26,58,107,.16);
+  --sh3:0 8px 40px rgba(26,58,107,.20);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Nunito',sans-serif;background:var(--sky);color:var(--ink);min-height:100vh}
+.top-nav{background:var(--navy);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,.15)}
+.tn-logo{font-family:'Fredoka One',cursive;font-size:22px;letter-spacing:1px;color:#fff;display:flex;align-items:center;gap:10px}
+.tn-logo span{color:var(--gold)}
+.tn-back{font-size:13px;font-weight:700;color:rgba(255,255,255,.8);cursor:pointer;display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:var(--r);transition:all .2s;text-decoration:none}
+.tn-back:hover{color:#fff;background:rgba(255,255,255,.1)}
+.tn-right{display:flex;align-items:center;gap:12px}
+.tn-pill{background:rgba(255,255,255,.1);border-radius:99px;padding:6px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:all .2s}
+.tn-pill:hover{background:rgba(255,255,255,.2)}
+.tn-avatar{width:32px;height:32px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:14px;color:var(--navy);font-weight:bold}
+.tn-name{font-size:13px;font-weight:700;color:#fff}
+.tn-logout{font-size:13px;font-weight:700;color:rgba(255,255,255,0.75);cursor:pointer;padding:6px 12px;border-radius:var(--r);display:flex;align-items:center;gap:6px}
+.tn-logout:hover{color:#fff;background:rgba(255,255,255,.1)}
+.menu-toggle{display:none;background:rgba(255,255,255,.15);border:none;border-radius:50%;width:44px;height:44px;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:20px}
+.mobile-menu{position:fixed;top:70px;right:20px;background:var(--navy);border-radius:var(--r2);padding:16px;display:none;flex-direction:column;gap:12px;z-index:101;box-shadow:0 8px 24px rgba(0,0,0,.2);min-width:200px}
+.mobile-menu .mobile-item{display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--r);cursor:pointer;color:#fff}
+.mobile-menu .mobile-item:hover{background:rgba(255,255,255,.1)}
+@media(max-width:768px){
+  .tn-right .tn-pill{display:none}
+  .tn-right .tn-logout{display:none}
+  .menu-toggle{display:flex}
+  .tn-back span{display:none}
+}
+.dashboard{padding:24px;max-width:1300px;margin:0 auto}
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.page-title{font-family:'Fredoka One',cursive;font-size:24px;color:var(--navy);display:flex;align-items:center;gap:10px}
+.page-title i{color:var(--gold)}
+.hero-cta{background:var(--gold);color:var(--navy);border:none;padding:12px 22px;border-radius:99px;font-family:'Fredoka One',cursive;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .2s;white-space:nowrap;text-decoration:none}
+.hero-cta:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.25);background:var(--gold2)}
+.filter-bar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.filter-pill{background:#fff;border:1.5px solid var(--sky2);padding:7px 16px;border-radius:99px;font-size:12px;font-weight:700;cursor:pointer;color:var(--ink2);transition:all .2s}
+.filter-pill.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.filter-pill:hover:not(.active){background:var(--sky2)}
+.projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+.project-card{background:#fff;border-radius:var(--r2);overflow:hidden;box-shadow:var(--sh);transition:all .3s;border:1px solid var(--sky2)}
+.project-card:hover{transform:translateY(-4px);box-shadow:var(--sh3);border-color:var(--gold)}
+.project-thumb{background:linear-gradient(135deg,var(--navy),var(--navy2));padding:24px 20px;text-align:center;color:#fff;position:relative}
+.project-thumb i{font-size:36px;color:var(--gold)}
+.project-status{position:absolute;top:10px;right:10px;font-size:9px;font-weight:800;text-transform:uppercase;padding:4px 9px;border-radius:99px;letter-spacing:.5px}
+.project-status.draft{background:rgba(255,255,255,.2);color:#fff}
+.project-status.published{background:var(--green2);color:#024d20}
+.project-body{padding:16px}
+.project-title{font-weight:800;font-size:15px;color:var(--navy);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.project-meta{font-size:11px;color:var(--ink3);margin-bottom:12px}
+.project-actions{display:flex;gap:6px;flex-wrap:wrap}
+.btn-primary{background:var(--gold);color:var(--navy);border:none;flex:1;text-align:center;padding:9px 6px;border-radius:var(--r);font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:5px;min-width:60px}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.btn-secondary{background:var(--sky);color:var(--ink2);border:1px solid var(--sky2);flex:1;text-align:center;padding:9px 6px;border-radius:var(--r);font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:5px;min-width:60px}
+.btn-secondary:hover{background:var(--sky2)}
+.btn-danger{background:#fde8e7;color:var(--red);border:1px solid #f8c9c7;text-align:center;padding:9px 10px;border-radius:var(--r);font-size:11px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-danger:hover{background:var(--red);color:#fff}
+.empty-state{text-align:center;padding:50px 20px;color:var(--ink3);background:#fff;border-radius:var(--r2);box-shadow:var(--sh)}
+.empty-state i{font-size:48px;margin-bottom:16px;opacity:.5;color:var(--gold)}
+.empty-state h3{font-family:'Fredoka One',cursive;color:var(--navy);margin-bottom:8px;font-size:18px}
+.empty-state p{font-size:13px;margin-bottom:20px}
+.modal{position:fixed;inset:0;background:rgba(26,38,56,.6);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.modal.on{display:flex}
+.modal-content{background:#fff;border-radius:var(--r2);padding:24px;max-width:420px;width:100%;box-shadow:var(--sh3)}
+.modal-title{font-family:'Fredoka One',cursive;font-size:17px;color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.modal-title i{color:var(--red)}
+.modal-text{font-size:13px;color:var(--ink2);margin-bottom:20px}
+.modal-actions{display:flex;gap:10px}
+.modal-actions button{flex:1;padding:11px;border-radius:var(--r);font-weight:700;font-size:13px;cursor:pointer;border:none}
+.modal-cancel{background:var(--sky);color:var(--ink2)}
+.modal-confirm{background:var(--red);color:#fff}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:2000;background:var(--navy);color:#fff;padding:8px 20px;border-radius:99px;font-family:'Fredoka One',cursive;font-size:12px;opacity:0;transition:opacity .25s;box-shadow:var(--sh2);white-space:nowrap}
+#toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<div class="top-nav">
+  <div class="tn-logo">
+    <a href="{% url 'dojo:developer_hub' %}" class="tn-back"><i class="fas fa-arrow-left"></i><span>Hub</span></a>
+    Revision<span>Dojo</span>
+  </div>
+  <div class="tn-right">
+    <div class="tn-pill" id="profileBtn">
+      <div class="tn-avatar" id="tnAvatar">S</div>
+      <span class="tn-name" id="tnName">Student</span>
+    </div>
+    <div class="tn-logout" id="logoutBtn">
+      <i class="fas fa-sign-out-alt"></i>
+      <span>Logout</span>
+    </div>
+    <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+  </div>
+</div>
+
+<div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-item" id="mobileHub"><i class="fas fa-rocket"></i> Developer Hub</div>
+  <div class="mobile-item" id="mobileLogout"><i class="fas fa-sign-out-alt"></i> Logout</div>
+</div>
+
+<div class="dashboard">
+  <div class="page-header">
+    <div class="page-title"><i class="fas fa-folder-open"></i> My Projects</div>
+    <a href="{% url 'dojo:developer_project_new' %}" class="hero-cta"><i class="fas fa-plus"></i> New Project</a>
+  </div>
+
+  {% if projects %}
+  <div class="filter-bar">
+    <div class="filter-pill active" data-filter="all">All ({{ projects|length }})</div>
+    <div class="filter-pill" data-filter="published">Published</div>
+    <div class="filter-pill" data-filter="draft">Drafts</div>
+  </div>
+
+  <div class="projects-grid" id="projectsGrid">
+    {% for project in projects %}
+    <div class="project-card" data-status="{% if project.is_published %}published{% else %}draft{% endif %}">
+      <div class="project-thumb">
+        <i class="fas fa-code"></i>
+        <div class="project-status {% if project.is_published %}published{% else %}draft{% endif %}">
+          {% if project.is_published %}Published{% else %}Draft{% endif %}
+        </div>
+      </div>
+      <div class="project-body">
+        <div class="project-title">{{ project.title }}</div>
+        <div class="project-meta"><i class="fas fa-clock"></i> Updated {{ project.updated_at|timesince }} ago</div>
+        <div class="project-actions">
+          <a href="{% url 'dojo:developer_editor' project.id %}" class="btn-primary"><i class="fas fa-pen"></i> Edit</a>
+          {% if project.is_published %}
+          <a href="{{ project.showcase_url }}" target="_blank" class="btn-secondary"><i class="fas fa-external-link-alt"></i> View</a>
+          {% endif %}
+          <button class="btn-danger" onclick="confirmDelete({{ project.id }}, '{{ project.title|escapejs }}')"><i class="fas fa-trash"></i></button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="fas fa-laptop-code"></i>
+    <h3>No projects yet</h3>
+    <p>Start your first HTML/CSS/JS project and bring your ideas to life.</p>
+    <a href="{% url 'dojo:developer_project_new' %}" class="hero-cta" style="margin:0 auto;display:inline-flex"><i class="fas fa-plus"></i> Create Your First Project</a>
+  </div>
+  {% endif %}
+</div>
+
+<div class="modal" id="deleteModal">
+  <div class="modal-content">
+    <div class="modal-title"><i class="fas fa-exclamation-triangle"></i> Delete Project?</div>
+    <div class="modal-text">Are you sure you want to delete "<span id="deleteProjectName"></span>"? This cannot be undone.</div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeDeleteModal()">Cancel</button>
+      <button class="modal-confirm" id="confirmDeleteBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="{% static 'dojo/js/csrf.js' %}"></script>
+<script>
+(function(){
+  'use strict';
+
+  async function api(method, path, body, isFormData=false){
+    let opts = { method, credentials: 'include' };
+    if(!isFormData){
+      opts.headers = { 'Content-Type': 'application/json' };
+      if(body) opts.body = JSON.stringify(body);
+    } else {
+      opts.body = body;
+    }
+    try{
+      let r = await fetch(path, opts);
+      return await r.json();
+    } catch(e){
+      console.error('API error:', e);
+      return { error: 'Network error' };
+    }
+  }
+  let GET = (p) => api('GET', p);
+
+  function toast(msg, bg='var(--navy)'){
+    let t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.background = bg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  async function loadProfile(){
+    let r = await GET('/api/me/');
+    if(r.error){ window.location.href = '/login/'; return; }
+    document.getElementById('tnAvatar').textContent = (r.user.first_name || 'S')[0].toUpperCase();
+    document.getElementById('tnName').textContent = r.user.first_name || 'Student';
+  }
+
+  document.getElementById('profileBtn')?.addEventListener('click', () => {
+    toast('Keep building — your work is saved when you hit Save in the editor!', 'var(--gold)');
+  });
+  document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+    await api('POST', '/api/logout/', {});
+    window.location.href = '/';
+  });
+  document.getElementById('mobileLogout')?.addEventListener('click', async () => {
+    await api('POST', '/api/logout/', {});
+    window.location.href = '/';
+  });
+  document.getElementById('mobileHub')?.addEventListener('click', () => {
+    window.location.href = "{% url 'dojo:developer_hub' %}";
+  });
+
+  const menuToggle = document.getElementById('menuToggle');
+  const mobileMenu = document.getElementById('mobileMenu');
+  if(menuToggle && mobileMenu){
+    menuToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      mobileMenu.style.display = mobileMenu.style.display === 'flex' ? 'none' : 'flex';
+    });
+    document.addEventListener('click', (e) => {
+      if(mobileMenu.style.display === 'flex' && !mobileMenu.contains(e.target) && e.target !== menuToggle)
+        mobileMenu.style.display = 'none';
+    });
+  }
+
+  // Filtering
+  document.querySelectorAll('.filter-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      const filter = pill.dataset.filter;
+      document.querySelectorAll('.project-card').forEach(card => {
+        card.style.display = (filter === 'all' || card.dataset.status === filter) ? '' : 'none';
+      });
+    });
+  });
+
+  // Delete flow
+  let pendingDeleteId = null;
+  window.confirmDelete = function(id, title){
+    pendingDeleteId = id;
+    document.getElementById('deleteProjectName').textContent = title;
+    document.getElementById('deleteModal').classList.add('on');
+  };
+  window.closeDeleteModal = function(){
+    document.getElementById('deleteModal').classList.remove('on');
+    pendingDeleteId = null;
+  };
+  document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+    if(!pendingDeleteId) return;
+    const id = pendingDeleteId;
+    closeDeleteModal();
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/developer/project/${id}/delete/`;
+    const csrf = document.createElement('input');
+    csrf.type = 'hidden';
+    csrf.name = 'csrfmiddlewaretoken';
+    csrf.value = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || '';
+    form.appendChild(csrf);
+    document.body.appendChild(form);
+    form.submit();
+  });
+
+  loadProfile();
+})();
+</script>
+</body>
+</html>
