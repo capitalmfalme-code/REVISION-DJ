@@ -330,8 +330,7 @@ if not DEBUG:
 #   SITE_URL              → https://www.revisionea.online
 #   DJANGO_DEBUG          → False
 #
-# IMPORTANT: keep the display name simple. Resend rejects certain punctuation
-# (em dashes, unusual chars) inside the display name.
+
 
 EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
 
