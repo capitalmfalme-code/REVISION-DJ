@@ -335,7 +335,7 @@ if not DEBUG:
 EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
 
 ANYMAIL = {
-    "RESEND_API_KEY": os.environ.get("RESEND_API_KEY", ""),
+    "RESEND_API_KEY": os.environ.get("RESEND_API_KEY", "re_DGAvTsFh_A7eFT8GeGsL33cX7AbtxAPMF"),
 }
 
 DEFAULT_FROM_EMAIL = os.environ.get(
