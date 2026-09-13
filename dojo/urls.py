@@ -48,6 +48,30 @@ urlpatterns = [
     path("developer/project/<int:project_id>/upload/", developer_views.api_developer_project_upload, name="developer_project_upload"),
     path("developer/project/<int:project_id>/delete/", developer_views.DeveloperProjectDeleteView.as_view(), name="developer_project_delete"),
     path("showcase/<slug:slug>/", developer_views.DeveloperShowcaseView.as_view(), name="developer_showcase"),
+
+    # ─── DEVELOPER FILES ──────────────────────────────────────────────────────
+    path("developer/project/<int:project_id>/files/", developer_views.api_developer_files_list, name="developer_files_list"),
+    path("developer/project/<int:project_id>/files/new/", developer_views.api_developer_file_create, name="developer_file_create"),
+    path("developer/project/<int:project_id>/folders/new/", developer_views.api_developer_folder_create, name="developer_folder_create"),
+    path("developer/file/<int:file_id>/save/", developer_views.api_developer_file_save, name="developer_file_save"),
+    path("developer/file/<int:file_id>/rename/", developer_views.api_developer_file_rename, name="developer_file_rename"),
+    path("developer/file/<int:file_id>/delete/", developer_views.api_developer_file_delete, name="developer_file_delete"),
+    path("developer/file/<int:file_id>/set-entry/", developer_views.api_developer_file_set_entry, name="developer_file_set_entry"),
+
+    # ─── DEVELOPER ASSETS ─────────────────────────────────────────────────────
+    path("developer/project/<int:project_id>/assets/", developer_views.api_developer_assets_list, name="developer_assets_list"),
+    path("developer/asset/<int:asset_id>/delete/", developer_views.api_developer_asset_delete, name="developer_asset_delete"),
+
+    # ─── ADMIN DEVELOPER API ──────────────────────────────────────────────────
+    # Developer Projects
+    path("api/admin/developer/projects/", developer_views.api_admin_developer_projects, name="api-admin-developer-projects"),
+    path("api/admin/developer/project/<int:project_id>/", developer_views.api_admin_developer_project_detail, name="api-admin-developer-project-detail"),
+    path("api/admin/developer/project/<int:project_id>/delete/", developer_views.api_admin_developer_project_delete, name="api-admin-developer-project-delete"),
+    
+    # Developer Access Control
+    path("api/admin/developer/suspend/<int:user_id>/", developer_views.api_admin_developer_suspend, name="api-admin-developer-suspend"),
+    path("api/admin/developer/restore/<int:user_id>/", developer_views.api_admin_developer_restore, name="api-admin-developer-restore"),
+    path("api/admin/developer/suspended/list/", developer_views.api_admin_developer_suspended_list, name="api-admin-developer-suspended-list"),
     
     # ── PUBLIC API ─────────────────────────────────────────────────────────
     path("api/public/stats/", views.api_public_stats, name="api-public-stats"),
@@ -238,8 +262,4 @@ urlpatterns = [
     path('api/admin/attachments/content/<int:content_id>/', views.api_admin_list_attachments, name='api_admin_attachments_by_content'),
     path('api/attachment/<int:attachment_id>/', views.api_serve_attachment, name='api_serve_attachment'),
     path('api/submission/<int:attempt_id>/file/<int:question_index>/', views.api_download_submission_file, name='api_download_submission_file'),
-
-    # Developer Projects (Admin)
-    path("api/admin/developer/projects/", views.api_admin_developer_projects, name="api-admin-developer-projects"),
-    path("api/admin/developer/project/<int:project_id>/delete/", views.api_admin_developer_project_delete, name="api-admin-developer-project-delete"),
 ]

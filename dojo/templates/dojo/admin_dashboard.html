@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-/* ========== ALL STYLES - PRESERVED ========== */
+/* ========== ALL STYLES ========== */
 :root{
   --sky:#eef6ff;--sky2:#d0e8fa;--sky3:#b8d8f5;
   --ink:#1a2638;--ink2:#3b4d63;--ink3:#7088a0;
@@ -135,11 +135,12 @@ body{font-family:'Nunito',sans-serif;background:var(--sky);color:var(--ink);over
 .modal-ov{position:fixed;inset:0;z-index:900;background:rgba(13,31,58,.65);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(6px)}
 .modal-ov.on{opacity:1;pointer-events:all}
 .modal-box{background:#fff;border-radius:22px;width:100%;max-width:800px;max-height:88vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,.3)}
-.mh{background:var(--navy);padding:20px 24px;display:flex;align-items:center;gap:14px;position:sticky;top:0}
-.mh-av{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:20px;color:#fff}
+.modal-box.wide{max-width:1000px}
+.mh{background:var(--navy);padding:20px 24px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:2}
+.mh-av{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:20px;color:#fff;flex-shrink:0}
 .mh-name{font-family:'Fredoka One',cursive;font-size:20px;color:#fff}
 .mh-meta{font-size:11px;font-weight:700;color:rgba(255,255,255,.6)}
-.mc-btn{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.12);border:none;color:#fff;cursor:pointer}
+.mc-btn{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.12);border:none;color:#fff;cursor:pointer;flex-shrink:0}
 .mb{padding:20px 24px}
 .ms-t{font-size:10px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);margin-bottom:10px;margin-top:16px}
 .ms-g{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
@@ -180,6 +181,35 @@ body{font-family:'Nunito',sans-serif;background:var(--sky);color:var(--ink);over
 .submission-files{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .attachment-badge{background:var(--blue-lt);border-radius:20px;padding:4px 12px;display:inline-flex;align-items:center;gap:6px;font-size:11px}
 .requires-upload-badge{background:var(--amber-lt);color:var(--amber);padding:2px 8px;border-radius:99px;font-size:10px;font-weight:800;margin-left:8px}
+
+/* Developer Code Viewer Styles */
+.dev-code-viewer{background:#1a1a2e;border-radius:var(--r2);padding:16px;max-height:500px;overflow:auto;font-family:'JetBrains Mono',monospace;font-size:12px;color:#e0e0e0;white-space:pre-wrap;word-break:break-all;tab-size:2}
+.dev-preview-container{background:#fff;border-radius:var(--r2);overflow:hidden;height:500px;border:2px solid var(--sky2)}
+.dev-preview-container iframe{width:100%;height:100%;border:none}
+.dev-asset-chip{background:var(--sky);border-radius:var(--r);padding:6px 10px;display:flex;align-items:center;gap:8px;border:1px solid var(--sky2)}
+.dev-asset-chip img{width:32px;height:32px;object-fit:cover;border-radius:4px;background:#fff}
+.dev-tab-btn{flex:none;padding:6px 16px;font-size:12px}
+.dev-tab-btn.on{background:#fff;color:var(--navy);box-shadow:var(--sh)}
+.dev-tab-btn.code-tab-html{color:#e34c26}
+.dev-tab-btn.code-tab-css{color:#264de4}
+.dev-tab-btn.code-tab-js{color:#f0db4f}
+.dev-tab-btn.code-tab-html.on{background:#e34c2622;border-color:#e34c26}
+.dev-tab-btn.code-tab-css.on{background:#264de422;border-color:#264de4}
+.dev-tab-btn.code-tab-js.on{background:#f0db4f33;border-color:#f0db4f}
+
+/* Developer Folders (per-student) */
+.dev-folders-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.dev-folder-card{background:#fff;border-radius:var(--r2);box-shadow:var(--sh);padding:18px;cursor:pointer;border-top:4px solid var(--sky2);transition:transform .14s,box-shadow .14s;position:relative}
+.dev-folder-card:hover{transform:translateY(-3px);box-shadow:var(--sh2)}
+.dev-folder-card.suspended{border-top-color:var(--red)}
+.dev-folder-icon{font-size:30px;color:var(--gold-dk);margin-bottom:10px}
+.dev-folder-name{font-family:'Fredoka One',cursive;font-size:15px;color:var(--navy);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dev-folder-email{font-size:10px;color:var(--ink3);margin-bottom:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dev-folder-stats{display:flex;gap:8px;flex-wrap:wrap}
+.dev-back-btn{display:inline-flex;align-items:center;gap:6px;background:var(--sky);border:2px solid var(--sky2);border-radius:99px;padding:7px 14px;font-family:'Fredoka One',cursive;font-size:12px;color:var(--navy);cursor:pointer;margin-bottom:14px}
+.dev-back-btn:hover{border-color:var(--blue);color:var(--blue)}
+.dev-student-header{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.dev-student-av{width:48px;height:48px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:19px;color:var(--navy);flex-shrink:0}
 </style>
 </head>
 <body>
@@ -389,7 +419,7 @@ body{font-family:'Nunito',sans-serif;background:var(--sky);color:var(--ink);over
         <div class="card"><div class="card-h"><div class="card-t"><i class="fas fa-book"></i> Subjects</div><button class="card-a" id="addSubjectBtn">+ Add</button></div><div class="card-b"><div id="subjectMatrix"></div></div></div>
       </div>
 
-      <!-- STUDENTS PAGE -->
+      <!-- STUDENTS PAGE - RESTORED ORIGINAL (NO DEV ACCESS) -->
       <div class="page" id="page-students">
         <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
           <div class="tabs" style="margin-bottom:0">
@@ -410,7 +440,18 @@ body{font-family:'Nunito',sans-serif;background:var(--sky);color:var(--ink);over
           <div class="tbl-wrap">
             <table class="tbl">
               <thead>
-                <tr><th>Student</th><th>County</th><th>School</th><th>Belt</th><th>Accuracy</th><th>Sessions</th><th>Streak</th><th>Status</th><th>Joined</th><th>Actions</th></tr>
+                <tr>
+                  <th>Student</th>
+                  <th>County</th>
+                  <th>School</th>
+                  <th>Belt</th>
+                  <th>Accuracy</th>
+                  <th>Sessions</th>
+                  <th>Streak</th>
+                  <th>Status</th>
+                  <th>Joined</th>
+                  <th>Actions</th>
+                </tr>
               </thead>
               <tbody id="studentsTbl"></tbody>
             </table>
@@ -424,23 +465,58 @@ body{font-family:'Nunito',sans-serif;background:var(--sky);color:var(--ink);over
         <div class="card"><div class="card-h"><div class="card-t"><i class="fas fa-users"></i> All Tutors</div></div><div class="card-b"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Tutor</th><th>Spec</th><th>County</th><th>Sessions</th><th>Students</th><th>Status</th><th>Actions</th></tr></thead><tbody id="tutorsTbl"></tbody></table></div></div></div>
       </div>
 
-      <!-- DEVELOPER HUB PAGE -->
+      <!-- DEVELOPER PROJECTS PAGE - GROUPED BY STUDENT FOLDER -->
       <div class="page" id="page-developer">
         <div class="g3">
-          <div class="kpi kb"><div class="kpi-icon"><i class="fas fa-code"></i></div><div class="kpi-val" id="devTotal">0</div><div class="kpi-lbl">Total Projects</div></div>
+          <div class="kpi kb"><div class="kpi-icon"><i class="fas fa-code"></i></div><div class="kpi-val" id="devTotal">0</div><div class="kpi-lbl">Total Projects (All Students)</div></div>
           <div class="kpi kgr"><div class="kpi-icon"><i class="fas fa-globe"></i></div><div class="kpi-val" id="devPublished">0</div><div class="kpi-lbl">Published</div></div>
-          <div class="kpi ka"><div class="kpi-icon"><i class="fas fa-file"></i></div><div class="kpi-val" id="devDrafts">0</div><div class="kpi-lbl">Drafts</div></div>
+          <div class="kpi kr"><div class="kpi-icon"><i class="fas fa-user-slash"></i></div><div class="kpi-val" id="devSuspendedStudents">0</div><div class="kpi-lbl">Suspended Students</div></div>
         </div>
-        <div class="card">
-          <div class="card-h"><div class="card-t"><i class="fas fa-folder-open"></i> All Developer Projects</div></div>
-          <div class="card-b">
-            <div class="tbl-wrap">
-              <table class="tbl">
-                <thead>
-                  <tr><th>#</th><th>Project</th><th>Student</th><th>Created</th><th>Updated</th><th>Status</th><th>Actions</th></tr>
-                </thead>
-                <tbody id="devProjectsTbl"></tbody>
-              </table>
+
+        <!-- FOLDERS VIEW: one folder per student -->
+        <div id="devFoldersView">
+          <div class="card">
+            <div class="card-h">
+              <div class="card-t"><i class="fas fa-folder-open"></i> Students with Projects <span style="font-weight:400;color:var(--ink3);font-size:12px" id="devFolderCountLbl"></span></div>
+              <div class="card-a" id="viewSuspendedProjects" style="color:var(--red)">View Suspended Only →</div>
+            </div>
+            <div class="card-b">
+              <input type="text" id="devFolderSearch" class="filter-select" placeholder="Search student by name or email..." style="width:100%;margin-bottom:14px">
+              <div id="devFoldersGrid" class="dev-folders-grid"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STUDENT DETAIL VIEW: projects belonging to one student -->
+        <div id="devStudentDetailView" style="display:none">
+          <button class="dev-back-btn" id="devBackToFoldersBtn"><i class="fas fa-arrow-left"></i> Back to all students</button>
+          <div class="card">
+            <div class="card-h">
+              <div style="display:flex;align-items:center;gap:14px">
+                <div class="dev-student-av" id="devStudentAv">?</div>
+                <div>
+                  <div class="card-t" id="devStudentName" style="margin-bottom:2px">Student</div>
+                  <div style="font-size:11px;color:var(--ink3)" id="devStudentEmail"></div>
+                </div>
+              </div>
+              <div id="devStudentFolderAction"></div>
+            </div>
+            <div class="card-b">
+              <div class="tbl-wrap">
+                <table class="tbl">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Project Name</th>
+                      <th>Created</th>
+                      <th>Updated</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="devStudentProjectsTbl"></tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
@@ -480,9 +556,52 @@ body{font-family:'Nunito',sans-serif;background:var(--sky);color:var(--ink);over
 
 <!-- MODALS -->
 <div class="modal-ov" id="questionModal"><div class="modal-box"><div class="mh"><div class="mh-av" style="background:var(--blue)"><i class="fas fa-question"></i></div><div><div class="mh-name">Question Editor</div><div class="mh-meta">Set correct answer for auto-grading</div></div><button class="mc-btn" id="closeQuestionModalBtn"><i class="fas fa-times"></i></button></div><div class="mb" id="questionModalBody"></div></div></div>
-<div class="modal-ov" id="submissionDetailModal"><div class="modal-box" style="max-width:900px"><div class="mh"><div class="mh-av" style="background:var(--green)"><i class="fas fa-file-alt"></i></div><div><div class="mh-name" id="submissionModalTitle">Submission Details</div><div class="mh-meta" id="submissionModalMeta">Student submission with files</div></div><button class="mc-btn" id="closeSubmissionModalBtn"><i class="fas fa-times"></i></button></div><div class="mb" id="submissionModalBody"></div></div></div>
+<div class="modal-ov" id="submissionDetailModal"><div class="modal-box wide"><div class="mh"><div class="mh-av" style="background:var(--green)"><i class="fas fa-file-alt"></i></div><div><div class="mh-name" id="submissionModalTitle">Submission Details</div><div class="mh-meta" id="submissionModalMeta">Student submission with files</div></div><button class="mc-btn" id="closeSubmissionModalBtn"><i class="fas fa-times"></i></button></div><div class="mb" id="submissionModalBody"></div></div></div>
 <div class="modal-ov" id="curriculumModal"><div class="modal-box"><div class="mh"><div class="mh-av" style="background:var(--green)"><i class="fas fa-school"></i></div><div><div class="mh-name">Add/Edit Curriculum</div><div class="mh-meta">Manage educational systems</div></div><button class="mc-btn" id="closeCurriculumModalBtn"><i class="fas fa-times"></i></button></div><div class="mb" id="curriculumModalBody"></div></div></div>
 <div class="modal-ov" id="userModal"><div class="modal-box"><div class="mh"><div class="mh-av" id="mhAv"></div><div><div class="mh-name" id="mhName"></div><div class="mh-meta" id="mhMeta"></div></div><button class="mc-btn" id="closeModalBtn"><i class="fas fa-times"></i></button></div><div class="mb" id="modalBody"></div></div></div>
+
+<!-- DEVELOPER PROJECT DETAIL MODAL -->
+<div class="modal-ov" id="devProjectModal">
+  <div class="modal-box wide">
+    <div class="mh" style="background:var(--navy2)">
+      <div class="mh-av" style="background:var(--gold)"><i class="fas fa-code"></i></div>
+      <div style="flex:1">
+        <div class="mh-name" id="devModalTitle">Project Details</div>
+        <div class="mh-meta">
+          Student: <span id="devModalStudent" style="font-weight:800">—</span> · 
+          Status: <span id="devModalStatus" style="font-weight:800">—</span> · 
+          <span id="devModalAssetsCount" style="font-weight:800">0 assets</span>
+        </div>
+      </div>
+      <a id="devLiveLink" href="#" target="_blank" class="qa-btn btn-sm" style="width:auto;background:var(--gold);color:var(--navy);margin:0 8px;display:none"><i class="fas fa-external-link-alt"></i> Live</a>
+      <button class="mc-btn" id="closeDevModalBtn"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="mb">
+      <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+        <button class="tab on dev-tab-btn code-tab-html" data-dev-tab="html" style="flex:none;padding:6px 16px;font-size:12px"><i class="fab fa-html5"></i> HTML</button>
+        <button class="tab dev-tab-btn code-tab-css" data-dev-tab="css" style="flex:none;padding:6px 16px;font-size:12px"><i class="fab fa-css3-alt"></i> CSS</button>
+        <button class="tab dev-tab-btn code-tab-js" data-dev-tab="js" style="flex:none;padding:6px 16px;font-size:12px"><i class="fab fa-js"></i> JavaScript</button>
+        <button class="tab dev-tab-btn" data-dev-tab="preview" style="flex:none;padding:6px 16px;font-size:12px;background:var(--green-lt);color:var(--green-dk)"><i class="fas fa-eye"></i> Live Preview</button>
+        <span style="flex:1"></span>
+        <button id="devCopyCodeBtn" class="qa-btn btn-sm" style="width:auto;background:var(--blue-lt);color:var(--blue)"><i class="fas fa-copy"></i> Copy All</button>
+        <button id="devDownloadCodeBtn" class="qa-btn btn-sm" style="width:auto;background:var(--purple-lt);color:var(--purple)"><i class="fas fa-download"></i> Download</button>
+      </div>
+      <div id="devCodeContainer" class="dev-code-viewer"></div>
+      <div id="devPreviewContainer" class="dev-preview-container" style="display:none">
+        <iframe id="devPreviewFrame" sandbox="allow-scripts allow-forms allow-modals allow-popups"></iframe>
+      </div>
+      <div style="margin-top:14px;padding-top:14px;border-top:2px solid var(--sky2)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <i class="fas fa-images" style="color:var(--blue)"></i>
+          <strong style="font-size:13px">Assets</strong>
+          <span style="font-size:11px;color:var(--ink3)" id="devAssetsCountLabel">(0)</span>
+        </div>
+        <div id="devAssetsList" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -501,6 +620,7 @@ let selectedFile = null;
 let editingQuestionIndex = null;
 let currentStep = 1;
 let devProjects = [];
+let devCurrentFolderUserId = null;
 
 async function api(method, path, body) {
   const opts = { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include' };
@@ -654,13 +774,13 @@ async function loadActivity() {
       document.getElementById('actTable').innerHTML = sessions.sessions.map(s => {
         const belt = BELTS.find(b => b.id === s.belt_id) || BELTS[0];
         const dt = new Date(s.created_at).toLocaleString();
-        return `<tr><td style="font-size:11px">${dt}</td>}<td><strong>${s.student_name || '—'}</strong></td><td>${s.county || '—'}</td><td>${s.school || '—'}</td><td><span style="background:${belt.color}22;color:${belt.color};padding:2px 8px;border-radius:99px;font-size:10px">${belt.name}</span></td><td>${s.passed ? '<span class="status-pill sp-ok">Passed</span>' : '<span class="status-pill sp-free">Attempted</span>'}</td><td><strong>${(s.accuracy||0).toFixed(0)}%</strong></td><td>${Math.floor(s.time_used/60)}m ${s.time_used%60}s</span></td><td>${s.total_q||0}</td></tr>`;
+        return `<tr><td style="font-size:11px">${dt}</td><td><strong>${s.student_name || '—'}</strong></td><td>${s.county || '—'}</td><td>${s.school || '—'}</td><td><span style="background:${belt.color}22;color:${belt.color};padding:2px 8px;border-radius:99px;font-size:10px">${belt.name}</span></td><td>${s.passed ? '<span class="status-pill sp-ok">Passed</span>' : '<span class="status-pill sp-free">Attempted</span>'}</td><td><strong>${(s.accuracy||0).toFixed(0)}%</strong></td><td>${Math.floor(s.time_used/60)}m ${s.time_used%60}s</td><td>${s.total_q||0}</td></tr>`;
       }).join('') || '<tr><td colspan="9" class="empty">No sessions</td></tr>';
     }
   } catch(e) { console.error('Activity error:', e); }
 }
 
-// ============ STUDENT FUNCTIONS ============
+// ============ STUDENT FUNCTIONS - RESTORED ORIGINAL ============
 async function loadStudents() {
   const county = document.getElementById('countyFilter').value;
   const paid = studentFilter === 'paid' ? '1' : studentFilter === 'free' ? '0' : '';
@@ -670,7 +790,10 @@ async function loadStudents() {
   if (paid) params.set('paid', paid);
   if ([...params].length) url += '?' + params.toString();
   const r = await GET(url);
-  if (r.error) { document.getElementById('studentsTbl').innerHTML = '<tr><td colspan="10" class="empty">Error loading students</td></tr>'; return; }
+  if (r.error) { 
+    document.getElementById('studentsTbl').innerHTML = '<tr><td colspan="10" class="empty">Error loading students</td></tr>'; 
+    return; 
+  }
   currentStudents = r.students || [];
   document.getElementById('studentCount').textContent = `Showing ${currentStudents.length} students`;
   renderStudentsTable(currentStudents);
@@ -678,7 +801,10 @@ async function loadStudents() {
 
 function renderStudentsTable(students) {
   const el = document.getElementById('studentsTbl');
-  if (!students.length) { el.innerHTML = '<tr><td colspan="10" class="empty">No students found</td></tr>'; return; }
+  if (!students.length) { 
+    el.innerHTML = '<tr><td colspan="10" class="empty">No students found</td></tr>'; 
+    return; 
+  }
   el.innerHTML = students.map(s => {
     const belt = s.belt_idx >= 0 ? BELTS[s.belt_idx] : null;
     const acc = (s.accuracy || 0).toFixed(0);
@@ -686,6 +812,7 @@ function renderStudentsTable(students) {
     const statusClass = s.is_paid ? 'sp-paid' : 'sp-free';
     const statusText = s.is_paid ? 'Paid' : 'Free';
     const accColor = acc >= 90 ? 'var(--green-dk)' : acc >= 70 ? 'var(--amber)' : 'var(--red)';
+    
     return `
       <tr>
         <td><div><strong>${escapeHtml(s.first_name)} ${escapeHtml(s.last_name)}</strong><div style="font-size:10px;color:var(--blue)">${escapeHtml(s.email || '')}</div></div></td>
@@ -697,12 +824,63 @@ function renderStudentsTable(students) {
         <td>${s.streak || 0}<i class="fas fa-fire" style="color:var(--gold);margin-left:4px"></i></td>
         <td><span class="status-pill ${statusClass}">${statusText}</span></td>
         <td>${joined}</td>
-        <td><button onclick="event.stopPropagation();openUserModal('${s.id}')" class="student-view-btn"><i class="fas fa-eye"></i> View</button></td>
+        <td>
+          <button onclick="event.stopPropagation();openUserModal('${s.id}')" class="student-view-btn"><i class="fas fa-eye"></i> View</button>
+        </td>
       </tr>
     `;
   }).join('');
 }
 
+// ============ STUDENT DEVELOPER ACCESS SUSPENSION (FROM DEVELOPER PROJECTS) ============
+window.suspendStudentDevAccess = async function(userId, userName) {
+  const reason = prompt(`Enter reason for suspending ${userName}'s developer access:`);
+  if (reason === null) return;
+  
+  const r = await POST(`/api/admin/developer/suspend/${userId}/`, { 
+    reason: reason || 'No reason provided' 
+  });
+  if (r.error) { toast(r.error, 'var(--red)'); return; }
+  toast(`🚫 ${userName}'s developer access suspended`, 'var(--red)');
+  loadDeveloperProjects();
+  if (devCurrentFolderUserId === userId) openStudentFolder(userId);
+};
+
+window.restoreStudentDevAccess = async function(userId, userName) {
+  if (!confirm(`✅ Restore ${userName}'s developer access?`)) return;
+  const r = await POST(`/api/admin/developer/restore/${userId}/`, {});
+  if (r.error) { toast(r.error, 'var(--red)'); return; }
+  toast(`✅ ${userName}'s developer access restored`, 'var(--green)');
+  loadDeveloperProjects();
+  if (devCurrentFolderUserId === userId) openStudentFolder(userId);
+};
+
+// ============ USER MODAL - RESTORED ORIGINAL ============
+window.openUserModal = async function(uid) {
+  const s = currentStudents.find(x => x.id == uid);
+  if (!s) return;
+  const belt = s.belt_idx >= 0 ? BELTS[s.belt_idx] : null;
+  document.getElementById('mhAv').style.background = belt ? belt.color : 'var(--ink3)';
+  document.getElementById('mhAv').textContent = (s.first_name || '?')[0];
+  document.getElementById('mhName').textContent = `${s.first_name} ${s.last_name}`;
+  document.getElementById('mhMeta').textContent = `${s.school || ''} · ${s.county || ''} · ${s.email || ''}`;
+  
+  document.getElementById('modalBody').innerHTML = `
+    <div class="ms-g">
+      <div class="ms-s sg"><div class="ms-n">${(s.accuracy||0).toFixed(0)}%</div><div class="ms-l">Accuracy</div></div>
+      <div class="ms-s sb"><div class="ms-n">${s.sessions||0}</div><div class="ms-l">Sessions</div></div>
+      <div class="ms-s so"><div class="ms-n">${s.streak||0}</div><div class="ms-l">Streak</div></div>
+      <div class="ms-s"><div class="ms-n">${s.total_correct||0}</div><div class="ms-l">Correct</div></div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+      ${!s.is_paid ? `<button onclick="upgradeUser('${s.id}')" class="qa-btn btn-sm" style="background:var(--gold);color:var(--navy);width:auto"><i class="fas fa-gem"></i> Grant Paid</button>` : ''}
+      <button onclick="suspendUser('${s.id}', this)" class="qa-btn btn-sm" style="background:var(--red-lt);color:var(--red);width:auto"><i class="fas fa-ban"></i> Suspend Account</button>
+    </div>
+  `;
+  document.getElementById('userModal').classList.add('on');
+};
+
+// ============ TUTOR FUNCTIONS ============
 async function loadTutors() {
   const r = await GET('/api/admin/tutors/');
   if (r.error) return;
@@ -724,42 +902,324 @@ async function loadTutors() {
   `).join('') || '<tr><td colspan="7" class="empty">No tutors</td></tr>';
 }
 
-// ============ DEVELOPER PROJECTS FUNCTIONS ============
+// ============ DEVELOPER PROJECTS FUNCTIONS (GROUPED BY STUDENT) ============
+
+// Build a map of userId -> { user_id, user_name, user_email, projects: [...] }
+function groupDevProjectsByStudent(projects) {
+  const map = new Map();
+  projects.forEach(p => {
+    const key = p.user_id;
+    if (!map.has(key)) {
+      map.set(key, {
+        user_id: p.user_id,
+        user_name: p.user_name || 'Unknown',
+        user_email: p.user_email || '',
+        developer_access_suspended: !!p.developer_access_suspended,
+        projects: []
+      });
+    }
+    const entry = map.get(key);
+    entry.projects.push(p);
+    // If ANY project for this user is flagged suspended, treat the whole folder as suspended
+    if (p.developer_access_suspended) entry.developer_access_suspended = true;
+  });
+  return Array.from(map.values()).sort((a, b) => b.projects.length - a.projects.length);
+}
+
 async function loadDeveloperProjects() {
   try {
-    // Fetch all DevProject objects via admin API
     const r = await GET('/api/admin/developer/projects/');
     if (r.error) {
-      console.error('Error loading developer projects:', r.error);
-      document.getElementById('devProjectsTbl').innerHTML = '<tr><td colspan="7" class="empty">Error loading projects</td></tr>';
+      document.getElementById('devFoldersGrid').innerHTML = '<div class="empty">Error loading projects</div>';
       return;
     }
     devProjects = r.projects || [];
+
+    // KPIs computed across ALL students/projects, not just the ones currently in view
     document.getElementById('devCount').textContent = devProjects.length;
     document.getElementById('devTotal').textContent = devProjects.length;
     document.getElementById('devPublished').textContent = devProjects.filter(p => p.is_published).length;
-    document.getElementById('devDrafts').textContent = devProjects.filter(p => !p.is_published).length;
-    
-    document.getElementById('devProjectsTbl').innerHTML = devProjects.map((p, i) => `
+    const suspendedStudents = new Set(devProjects.filter(p => p.developer_access_suspended).map(p => p.user_id));
+    document.getElementById('devSuspendedStudents').textContent = suspendedStudents.size;
+
+    renderDevFolders();
+
+    // If we were previously looking at a specific student's folder, refresh that view too
+    if (devCurrentFolderUserId !== null) {
+      openStudentFolder(devCurrentFolderUserId, true);
+    }
+  } catch(e) {
+    console.error('Error loading developer projects:', e);
+    document.getElementById('devFoldersGrid').innerHTML = '<div class="empty">Error loading projects</div>';
+  }
+}
+
+function renderDevFolders(filterText) {
+  const folders = groupDevProjectsByStudent(devProjects);
+  document.getElementById('devFolderCountLbl').textContent = `(${folders.length} student${folders.length !== 1 ? 's' : ''}, ${devProjects.length} total project${devProjects.length !== 1 ? 's' : ''})`;
+
+  const term = (filterText || '').toLowerCase();
+  const visible = term
+    ? folders.filter(f => f.user_name.toLowerCase().includes(term) || f.user_email.toLowerCase().includes(term))
+    : folders;
+
+  const grid = document.getElementById('devFoldersGrid');
+  if (!visible.length) {
+    grid.innerHTML = '<div class="empty">No developer projects found</div>';
+    return;
+  }
+
+  grid.innerHTML = visible.map(f => {
+    const published = f.projects.filter(p => p.is_published).length;
+    const initial = (f.user_name || '?')[0].toUpperCase();
+    return `
+      <div class="dev-folder-card ${f.developer_access_suspended ? 'suspended' : ''}" onclick="openStudentFolder(${f.user_id})">
+        <div class="dev-folder-icon"><i class="fas fa-folder"></i></div>
+        <div class="dev-folder-name">${escapeHtml(f.user_name)}</div>
+        <div class="dev-folder-email">${escapeHtml(f.user_email)}</div>
+        <div class="dev-folder-stats">
+          <span class="tag-badge"><i class="fas fa-code"></i> ${f.projects.length} project${f.projects.length !== 1 ? 's' : ''}</span>
+          <span class="tag-badge" style="background:var(--green-lt);color:var(--green-dk)"><i class="fas fa-globe"></i> ${published} live</span>
+          ${f.developer_access_suspended ? '<span class="status-pill sp-free" style="background:var(--red-lt);color:var(--red)">🚫 Suspended</span>' : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+document.getElementById('devFolderSearch')?.addEventListener('input', (e) => renderDevFolders(e.target.value));
+
+// View only students/folders with suspended developer access
+document.getElementById('viewSuspendedProjects')?.addEventListener('click', function() {
+  const folders = groupDevProjectsByStudent(devProjects);
+  const suspended = folders.filter(f => f.developer_access_suspended);
+  if (suspended.length === 0) {
+    toast('No students with suspended developer access', 'var(--amber)');
+    return;
+  }
+  const grid = document.getElementById('devFoldersGrid');
+  grid.innerHTML = suspended.map(f => {
+    const published = f.projects.filter(p => p.is_published).length;
+    return `
+      <div class="dev-folder-card suspended" onclick="openStudentFolder(${f.user_id})">
+        <div class="dev-folder-icon"><i class="fas fa-folder"></i></div>
+        <div class="dev-folder-name">${escapeHtml(f.user_name)}</div>
+        <div class="dev-folder-email">${escapeHtml(f.user_email)}</div>
+        <div class="dev-folder-stats">
+          <span class="tag-badge"><i class="fas fa-code"></i> ${f.projects.length} project${f.projects.length !== 1 ? 's' : ''}</span>
+          <span class="tag-badge" style="background:var(--green-lt);color:var(--green-dk)"><i class="fas fa-globe"></i> ${published} live</span>
+          <span class="status-pill sp-free" style="background:var(--red-lt);color:var(--red)">🚫 Suspended</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+  toast(`Showing ${suspended.length} student(s) with suspended developer access`, 'var(--blue)');
+});
+
+// Open a single student's folder: show only their projects in a table
+window.openStudentFolder = function(userId, silent) {
+  const folders = groupDevProjectsByStudent(devProjects);
+  const folder = folders.find(f => f.user_id === userId);
+  if (!folder) {
+    if (!silent) toast('Student folder not found', 'var(--red)');
+    document.getElementById('devFoldersView').style.display = 'block';
+    document.getElementById('devStudentDetailView').style.display = 'none';
+    devCurrentFolderUserId = null;
+    return;
+  }
+  devCurrentFolderUserId = userId;
+
+  document.getElementById('devFoldersView').style.display = 'none';
+  document.getElementById('devStudentDetailView').style.display = 'block';
+
+  document.getElementById('devStudentAv').textContent = (folder.user_name || '?')[0].toUpperCase();
+  document.getElementById('devStudentAv').style.background = folder.developer_access_suspended ? 'var(--red)' : 'var(--gold)';
+  document.getElementById('devStudentName').textContent = folder.user_name;
+  document.getElementById('devStudentEmail').textContent = `${folder.user_email} · ${folder.projects.length} project${folder.projects.length !== 1 ? 's' : ''}`;
+
+  const actionBtn = folder.developer_access_suspended
+    ? `<button onclick="restoreStudentDevAccess(${folder.user_id}, '${escapeHtml(folder.user_name)}')" class="qa-btn btn-sm" style="width:auto;background:var(--green-lt);color:var(--green-dk)"><i class="fas fa-check"></i> Restore Dev Access</button>`
+    : `<button onclick="suspendStudentDevAccess(${folder.user_id}, '${escapeHtml(folder.user_name)}')" class="qa-btn btn-sm" style="width:auto;background:var(--red-lt);color:var(--red)"><i class="fas fa-ban"></i> Suspend Dev Access</button>`;
+  document.getElementById('devStudentFolderAction').innerHTML = actionBtn;
+
+  document.getElementById('devStudentProjectsTbl').innerHTML = folder.projects.map((p, i) => {
+    const statusClass = p.is_published ? 'sp-ok' : 'sp-draft';
+    const statusText = p.is_published ? 'Published' : 'Draft';
+    const liveLink = p.is_published
+      ? `<a href="${p.showcase_url}" target="_blank" class="qa-btn btn-sm" style="width:auto;background:var(--green-lt);color:var(--green-dk)"><i class="fas fa-external-link-alt"></i> View</a>`
+      : '';
+    return `
       <tr>
         <td>${i+1}</td>
         <td><strong>${escapeHtml(p.title)}</strong></td>
-        <td>${escapeHtml(p.user_name || 'Unknown')}</td>
-        <td style="font-size:11px">${formatDate(p.created_at)}</span></td>
-        <td style="font-size:11px">${formatDate(p.updated_at)}</span></td>
-        <td><span class="status-pill ${p.is_published ? 'sp-ok' : 'sp-draft'}">${p.is_published ? 'Published' : 'Draft'}</span></td>
+        <td style="font-size:11px">${formatDate(p.created_at)}</td>
+        <td style="font-size:11px">${formatDate(p.updated_at)}</td>
+        <td><span class="status-pill ${statusClass}">${statusText}</span></td>
         <td>
-          ${p.is_published ? `<a href="${p.showcase_url}" target="_blank" class="qa-btn btn-sm" style="width:auto;background:var(--green-lt);color:var(--green-dk)"><i class="fas fa-external-link-alt"></i> View</a>` : ''}
-          <button onclick="deleteDevProject(${p.id})" class="qa-btn btn-sm" style="width:auto;background:var(--red-lt);color:var(--red)"><i class="fas fa-trash"></i> Delete</button>
+          <button onclick="viewDevProject(${p.id})" class="qa-btn btn-sm" style="width:auto;background:var(--blue-lt);color:var(--blue)"><i class="fas fa-folder-open"></i> Code</button>
+          ${liveLink}
+          <button onclick="deleteDevProject(${p.id})" class="qa-btn btn-sm" style="width:auto;background:var(--red-lt);color:var(--red)"><i class="fas fa-trash"></i></button>
         </td>
       </tr>
-    `).join('') || '<tr><td colspan="7" class="empty">No developer projects</td></tr>';
+    `;
+  }).join('') || '<tr><td colspan="6" class="empty">No projects</td></tr>';
+};
+
+document.getElementById('devBackToFoldersBtn')?.addEventListener('click', function() {
+  devCurrentFolderUserId = null;
+  document.getElementById('devFoldersView').style.display = 'block';
+  document.getElementById('devStudentDetailView').style.display = 'none';
+  renderDevFolders(document.getElementById('devFolderSearch')?.value || '');
+});
+
+async function viewDevProject(projectId) {
+  try {
+    const r = await GET(`/api/admin/developer/project/${projectId}/`);
+    if (r.error) { toast(r.error, 'var(--red)'); return; }
+    const p = r.project;
+    
+    document.getElementById('devModalTitle').textContent = escapeHtml(p.title);
+    document.getElementById('devModalStudent').textContent = escapeHtml(p.user_name || 'Unknown');
+    document.getElementById('devModalStatus').textContent = p.is_published ? '✅ Published' : '📝 Draft';
+    document.getElementById('devModalStatus').style.color = p.is_published ? 'var(--green-dk)' : 'var(--amber)';
+    
+    const assetCount = (p.assets || []).length;
+    document.getElementById('devModalAssetsCount').textContent = `${assetCount} asset${assetCount !== 1 ? 's' : ''}`;
+    
+    const liveLink = document.getElementById('devLiveLink');
+    if (p.showcase_url) {
+      liveLink.href = p.showcase_url;
+      liveLink.style.display = 'inline-flex';
+    } else {
+      liveLink.style.display = 'none';
+    }
+    
+    const assetsList = document.getElementById('devAssetsList');
+    const assetsCountLabel = document.getElementById('devAssetsCountLabel');
+    if (p.assets && p.assets.length) {
+      assetsCountLabel.textContent = `(${p.assets.length})`;
+      assetsList.innerHTML = p.assets.map(a => `
+        <div class="dev-asset-chip">
+          ${a.url.match(/\.(png|jpe?g|gif|webp|svg)/i) ? `<img src="${a.url}" alt="">` : `<i class="fas fa-file" style="font-size:20px;color:var(--blue)"></i>`}
+          <span style="font-size:11px;font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(a.filename)}</span>
+          <a href="${a.url}" target="_blank" style="font-size:10px;color:var(--blue)"><i class="fas fa-eye"></i></a>
+          <button onclick="copyAssetUrl('${a.url}')" style="background:none;border:none;cursor:pointer;color:var(--ink3)"><i class="fas fa-copy"></i></button>
+        </div>
+      `).join('');
+    } else {
+      assetsCountLabel.textContent = '(0)';
+      assetsList.innerHTML = '<span style="font-size:11px;color:var(--ink3)">No assets uploaded</span>';
+    }
+    
+    window._devProjectData = {
+      html: p.html_code || '',
+      css: p.css_code || '',
+      js: p.js_code || '',
+    };
+    
+    switchDevTab('html');
+    document.getElementById('devProjectModal').classList.add('on');
     
   } catch(e) {
-    console.error('Error loading developer projects:', e);
-    document.getElementById('devProjectsTbl').innerHTML = '<tr><td colspan="7" class="empty">Error loading projects</td></tr>';
+    toast('Error loading project details', 'var(--red)');
   }
 }
+
+function switchDevTab(tab) {
+  const container = document.getElementById('devCodeContainer');
+  const previewContainer = document.getElementById('devPreviewContainer');
+  const frame = document.getElementById('devPreviewFrame');
+  const data = window._devProjectData || { html: '', css: '', js: '' };
+  
+  document.querySelectorAll('[data-dev-tab]').forEach(t => t.classList.remove('on'));
+  const tabBtn = document.querySelector(`[data-dev-tab="${tab}"]`);
+  if (tabBtn) tabBtn.classList.add('on');
+  
+  if (tab === 'preview') {
+    container.style.display = 'none';
+    previewContainer.style.display = 'block';
+    const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${data.css}</style></head><body>${data.html}<script>${data.js}<\/script></body></html>`;
+    frame.srcdoc = doc;
+    return;
+  }
+  
+  container.style.display = 'block';
+  previewContainer.style.display = 'none';
+  
+  const codeMap = { html: data.html, css: data.css, js: data.js };
+  const code = codeMap[tab] || '// No code';
+  let highlighted = escapeHtml(code);
+  if (tab === 'html') {
+    highlighted = highlighted
+      .replace(/(&lt;\/?[\w-]+)/g, '<span style="color:#f08d49">$1</span>')
+      .replace(/(&lt;!--.*?--&gt;)/g, '<span style="color:#6a6a7a;font-style:italic">$1</span>')
+      .replace(/(["'])(.*?)\1/g, '<span style="color:#7cb8f7">$1$2$1</span>');
+  } else if (tab === 'css') {
+    highlighted = highlighted
+      .replace(/([\w-]+)(?=\s*\{)/g, '<span style="color:#f08d49">$1</span>')
+      .replace(/(\{|\})/g, '<span style="color:#e0e0e0">$1</span>')
+      .replace(/(\/\*.*?\*\/)/g, '<span style="color:#6a6a7a;font-style:italic">$1</span>')
+      .replace(/(#[\w]+)/g, '<span style="color:#7cb8f7">$1</span>');
+  } else if (tab === 'js') {
+    highlighted = highlighted
+      .replace(/(\/\/.*?$)/gm, '<span style="color:#6a6a7a;font-style:italic">$1</span>')
+      .replace(/(\/\*.*?\*\/)/gs, '<span style="color:#6a6a7a;font-style:italic">$1</span>')
+      .replace(/(["'])(.*?)\1/g, '<span style="color:#7cb8f7">$1$2$1</span>')
+      .replace(/\b(function|return|const|let|var|if|else|for|while|class|new|this|try|catch|throw|async|await)\b/g, '<span style="color:#f08d49">$1</span>');
+  }
+  container.innerHTML = highlighted;
+}
+
+window.copyAssetUrl = function(url) {
+  navigator.clipboard?.writeText(window.location.origin + url);
+  toast('Asset URL copied!', 'var(--green)');
+};
+
+document.getElementById('devCopyCodeBtn')?.addEventListener('click', function() {
+  const data = window._devProjectData || { html: '', css: '', js: '' };
+  const fullCode = `<!-- HTML -->\n${data.html}\n\n<!-- CSS -->\n${data.css}\n\n<!-- JavaScript -->\n${data.js}`;
+  navigator.clipboard?.writeText(fullCode);
+  toast('All code copied!', 'var(--green)');
+});
+
+document.getElementById('devDownloadCodeBtn')?.addEventListener('click', function() {
+  const data = window._devProjectData || { html: '', css: '', js: '' };
+  const fullHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project</title>
+  <style>${data.css}</style>
+</head>
+<body>
+  ${data.html}
+  <script>${data.js}<\/script>
+</body>
+</html>`;
+  const blob = new Blob([fullHtml], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `project_${Date.now()}.html`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Downloaded!', 'var(--green)');
+});
+
+document.addEventListener('click', function(e) {
+  const tab = e.target.closest('[data-dev-tab]');
+  if (tab) {
+    switchDevTab(tab.dataset.devTab);
+  }
+});
+
+document.getElementById('closeDevModalBtn')?.addEventListener('click', function() {
+  document.getElementById('devProjectModal').classList.remove('on');
+});
+document.getElementById('devProjectModal')?.addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('on');
+});
 
 async function deleteDevProject(projectId) {
   if (!confirm('Delete this developer project? This cannot be undone.')) return;
@@ -832,8 +1292,7 @@ async function loadKnowledge() {
       <td><strong style="color:var(--red)">${f.fact}</strong></td>
       <td>${f.seen}</td>
       <td><strong style="color:var(--red)">${(f.acc*100).toFixed(0)}%</strong></td>
-      <td>${(f.avgTime/1000).toFixed(1)}s</span></td>
-    </tr>
+      <td>${(f.avgTime/1000).toFixed(1)}s</td></tr>
   `).join('') || '<tr><td colspan="5" class="empty">No data</td></tr>';
 }
 
@@ -865,7 +1324,7 @@ async function loadInterests() {
     <tr>
       <td>${idx + 1}</td>
       <td><strong style="color:var(--blue)">${escapeHtml(interest.email)}</strong></td>
-      <td>${formatDate(interest.created_at)}</span></td>
+      <td>${formatDate(interest.created_at)}</td>
       <td><button onclick="copyEmail('${escapeHtml(interest.email)}')" class="qa-btn btn-sm" style="background:var(--blue-lt);color:var(--blue);width:auto"><i class="fas fa-copy"></i> Copy</button>
       <button onclick="deleteInterest(${interest.id})" class="qa-btn btn-sm" style="background:var(--red-lt);color:var(--red);width:auto"><i class="fas fa-trash"></i> Delete</button></td>
     </tr>
@@ -1179,7 +1638,7 @@ async function loadContentLibrary() {
       <td>${item.question_count || 0}</td>
       <td>${item.attempt_count || 0}</td>
       <td><span class="status-pill ${item.status === 'published' ? 'sp-ok' : 'sp-draft'}">${item.status_display}</span></td>
-      <td>${formatDate(item.created_at)}</span></td>
+      <td>${formatDate(item.created_at)}</td>
       <td><button onclick="viewContent(${item.id})" class="qa-btn btn-sm" style="width:auto"><i class="fas fa-eye"></i> View</button>
       <button onclick="viewContentSubmissions(${item.id})" class="qa-btn btn-sm" style="background:var(--green-lt);color:var(--green-dk);width:auto"><i class="fas fa-file-upload"></i> Submissions (${item.attempt_count || 0})</button>
       <button onclick="deleteContent(${item.id})" class="qa-btn btn-sm" style="width:auto;background:var(--red-lt);color:var(--red)"><i class="fas fa-trash"></i> Delete</button></td>
@@ -1531,25 +1990,6 @@ window.deleteContent = async function(id) {
   if (r.error) { toast(r.error, 'var(--red)'); return; }
   toast('Deleted', 'var(--amber)');
   loadContentLibrary();
-};
-
-window.openUserModal = async function(uid) {
-  const s = currentStudents.find(x => x.id == uid);
-  if (!s) return;
-  const belt = s.belt_idx >= 0 ? BELTS[s.belt_idx] : null;
-  document.getElementById('mhAv').style.background = belt ? belt.color : 'var(--ink3)';
-  document.getElementById('mhAv').textContent = (s.first_name || '?')[0];
-  document.getElementById('mhName').textContent = `${s.first_name} ${s.last_name}`;
-  document.getElementById('mhMeta').textContent = `${s.school || ''} · ${s.county || ''} · ${s.email || ''}`;
-  document.getElementById('modalBody').innerHTML = `
-    <div class="ms-g"><div class="ms-s sg"><div class="ms-n">${(s.accuracy||0).toFixed(0)}%</div><div class="ms-l">Accuracy</div></div>
-    <div class="ms-s sb"><div class="ms-n">${s.sessions||0}</div><div class="ms-l">Sessions</div></div>
-    <div class="ms-s so"><div class="ms-n">${s.streak||0}</div><div class="ms-l">Streak</div></div>
-    <div class="ms-s"><div class="ms-n">${s.total_correct||0}</div><div class="ms-l">Correct</div></div></div>
-    <div style="margin-top:16px;display:flex;gap:8px">${!s.is_paid ? `<button onclick="upgradeUser('${s.id}')" class="qa-btn btn-sm" style="background:var(--gold);color:var(--navy);width:auto"><i class="fas fa-gem"></i> Grant Paid</button>` : ''}
-    <button onclick="suspendUser('${s.id}', this)" class="qa-btn btn-sm" style="background:var(--red-lt);color:var(--red);width:auto"><i class="fas fa-ban"></i> Suspend</button></div>
-  `;
-  document.getElementById('userModal').classList.add('on');
 };
 
 window.approveTutor = async function(uid, btn) {

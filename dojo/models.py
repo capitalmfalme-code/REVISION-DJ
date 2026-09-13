@@ -1,20 +1,5 @@
 """
 All database models for TimesTable Dojo.
-
-Model hierarchy:
-  User  (extends AbstractUser — so we get auth, permissions, is_staff for free)
-    ├── BeltProgress   (one per belt per user — 9 rows created on register)
-    ├── FactMemory     (one per multiplication fact per user — up to 400 rows)
-    ├── TrainingSession (one per completed game session)
-    ├── UserBadge      (junction: user × badge)
-    ├── Streak         (one row per user, updated daily)
-    ├── TutorRequest   (student → tutor connection request)
-    ├── UserSubscription (one per user for premium access)
-    └── UserTrial      (tracks trial periods for different features)
-
-Run after changes:
-    python manage.py makemigrations
-    python manage.py migrate
 """
 
 import json
@@ -23,6 +8,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.utils.text import slugify
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -40,9 +26,8 @@ BELT_CHOICES = [
     ("master", "Master Belt"),
 ]
 
-BELT_ORDER = [b[0] for b in BELT_CHOICES]   # ['white', 'yellow', ...]
+BELT_ORDER = [b[0] for b in BELT_CHOICES]
 
-# Belt details including tables and time limits
 BELT_DETAILS = {
     "white":  {"tables": [2, 5, 10, 11], "minutes": 5, "emoji": "⬜", "color": "#d0d0d0", "textColor": "#1a2638"},
     "yellow": {"tables": [2, 3, 4, 5, 10, 11], "minutes": 7, "emoji": "🟡", "color": "#f9a825", "textColor": "#1a2638"},
@@ -54,20 +39,6 @@ BELT_DETAILS = {
     "gold":   {"tables": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], "minutes": 19, "emoji": "🏅", "color": "#b8860b", "textColor": "#ffffff"},
     "master": {"tables": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "minutes": 21, "emoji": "👑", "color": "#1a237e", "textColor": "#ffffff"},
 }
-
-ROLE_CHOICES = [
-    ("student", "Student"),
-    ("tutor",   "Tutor"),
-    ("admin",   "Admin"),
-    ('parent', 'Parent'),
-]
-
-TUTOR_SPEC_CHOICES = [
-    ("primary", "Primary (Grades 1–4)"),
-    ("junior",  "Junior (Grades 5–7)"),
-    ("senior",  "Senior (Grades 8–10)"),
-    ("all",     "All Levels"),
-]
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -87,9 +58,9 @@ class User(AbstractUser):
     
     TUTOR_SPEC_CHOICES = [
         ("primary", "Primary (Grades 1–4)"),
-        ("junior", "Junior (Grades 5–7)"),
-        ("senior", "Senior (Grades 8–10)"),
-        ("all", "All Levels"),
+        ("junior",  "Junior (Grades 5–7)"),
+        ("senior",  "Senior (Grades 8–10)"),
+        ("all",     "All Levels"),
     ]
     
     CURRICULUM_CHOICES = [
@@ -111,7 +82,7 @@ class User(AbstractUser):
     trial_used = models.BooleanField(default=False)
     trial_started_at = models.DateTimeField(null=True, blank=True)
     
-    # Curriculum and Grade for personalized learning paths
+    # Curriculum and Grade
     curriculum = models.CharField(
         max_length=10, 
         choices=CURRICULUM_CHOICES, 
@@ -127,7 +98,6 @@ class User(AbstractUser):
         help_text="Grade level (e.g., Grade 5, Form 2, Year 10)"
     )
     
-    # Phone number for parents/guardians
     phone = models.CharField(
         max_length=20, 
         blank=True, 
@@ -135,8 +105,44 @@ class User(AbstractUser):
         help_text="Phone number for parents/guardians"
     )
     
-    # Timestamp for when curriculum was last updated
     curriculum_updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+    
+    # ─── DEVELOPER ACCESS CONTROL ──────────────────────────────────────────
+    developer_access_suspended = models.BooleanField(
+        default=False, 
+        db_index=True,
+        help_text="If True, student cannot access Developer Hub"
+    )
+    developer_suspended_at = models.DateTimeField(
+        null=True, 
+        blank=True,
+        help_text="When the developer access was suspended"
+    )
+    developer_suspended_by = models.ForeignKey(
+        'self', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='developer_suspensions_made',
+        help_text="Admin who suspended the developer access"
+    )
+    developer_suspension_reason = models.TextField(
+        blank=True,
+        help_text="Reason for suspending developer access"
+    )
+    developer_restored_at = models.DateTimeField(
+        null=True, 
+        blank=True,
+        help_text="When the developer access was restored"
+    )
+    developer_restored_by = models.ForeignKey(
+        'self', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='developer_restorations_made',
+        help_text="Admin who restored the developer access"
+    )
 
     class Meta:
         verbose_name = "User"
@@ -146,6 +152,7 @@ class User(AbstractUser):
             models.Index(fields=["email"]),
             models.Index(fields=["role"]),
             models.Index(fields=["curriculum", "grade"]),
+            models.Index(fields=["developer_access_suspended"]),
         ]
 
     def __str__(self):
@@ -153,25 +160,21 @@ class User(AbstractUser):
     
     @property
     def active_belt_id(self):
-        """Return the belt ID based on current index"""
         if self.current_belt_idx < len(BELT_ORDER):
             return BELT_ORDER[self.current_belt_idx]
         return BELT_ORDER[-1] if BELT_ORDER else "white"
     
     @property
     def has_curriculum_set(self):
-        """Check if user has selected a curriculum"""
         return self.curriculum is not None and self.curriculum != ""
     
     @property
     def display_grade(self):
-        """Return formatted grade name"""
         if not self.grade:
             return "Not set"
         return self.grade.replace('_', ' ').title()
     
     def get_dashboard_url(self):
-        """Get the appropriate dashboard URL based on role and curriculum"""
         if self.role == 'student':
             if self.curriculum == 'cbc':
                 return '/cbc-dashboard/'
@@ -194,7 +197,6 @@ class User(AbstractUser):
         return self.get_full_name() or self.username
 
     def get_current_belt_idx(self):
-        """Get the index of the current active belt (next belt to train)"""
         if hasattr(self, '_current_belt_idx_cache'):
             return self._current_belt_idx_cache
         
@@ -217,7 +219,6 @@ class User(AbstractUser):
         return idx
 
     def update_current_belt(self):
-        """Update the current belt index based on passed belts"""
         passed = self.belt_progress.filter(passed=True).values_list("belt_id", flat=True)
         passed_set = set(passed)
         
@@ -231,43 +232,70 @@ class User(AbstractUser):
         self.save(update_fields=['current_belt_idx'])
         return len(BELT_ORDER) - 1
 
-    @property
-    def active_belt_id(self):
-        """Get the ID of the current active belt"""
-        idx = self.get_current_belt_idx()
-        return BELT_ORDER[idx] if idx < len(BELT_ORDER) else BELT_ORDER[-1]
+    # ─── DEVELOPER ACCESS METHODS ──────────────────────────────────────────
     
     @property
-    def active_belt_details(self):
-        """Get details of the active belt"""
-        return BELT_DETAILS.get(self.active_belt_id, BELT_DETAILS["white"])
+    def can_access_developer_hub(self):
+        """Check if user can access the developer hub"""
+        return not self.developer_access_suspended
+    
+    def suspend_developer_access(self, admin_user=None, reason=""):
+        """Suspend a student's developer access"""
+        if self.role != 'student':
+            return False
+        
+        self.developer_access_suspended = True
+        self.developer_suspended_at = timezone.now()
+        self.developer_suspended_by = admin_user
+        self.developer_suspension_reason = reason or "No reason provided"
+        self.developer_restored_at = None
+        self.developer_restored_by = None
+        self.save(update_fields=[
+            'developer_access_suspended', 
+            'developer_suspended_at', 
+            'developer_suspended_by', 
+            'developer_suspension_reason',
+            'developer_restored_at',
+            'developer_restored_by',
+        ])
+        return True
+    
+    def restore_developer_access(self, admin_user=None):
+        """Restore a student's developer access"""
+        if self.role != 'student':
+            return False
+        
+        self.developer_access_suspended = False
+        self.developer_restored_at = timezone.now()
+        self.developer_restored_by = admin_user
+        self.save(update_fields=[
+            'developer_access_suspended', 
+            'developer_restored_at', 
+            'developer_restored_by',
+        ])
+        return True
+    
+    def get_developer_suspension_info(self):
+        """Get detailed suspension info"""
+        if not self.developer_access_suspended:
+            return None
+        
+        return {
+            'suspended': True,
+            'reason': self.developer_suspension_reason,
+            'suspended_at': self.developer_suspended_at,
+            'suspended_by': self.developer_suspended_by,
+            'suspended_by_name': self.developer_suspended_by.get_full_name() or self.developer_suspended_by.username if self.developer_suspended_by else None,
+        }
+    
+    @property
+    def has_developer_access(self):
+        """Alias for can_access_developer_hub"""
+        return self.can_access_developer_hub
 
-    def get_leaderboard_score(self):
-        return self.training_sessions.aggregate(
-            total=models.Sum("correct")
-        )["total"] or 0
-    
-    def get_total_correct(self):
-        return self.training_sessions.aggregate(
-            total=models.Sum("correct")
-        )["total"] or 0
-    
-    def get_total_questions(self):
-        return self.training_sessions.aggregate(
-            total=models.Sum("total_q")
-        )["total"] or 0
-    
-    def get_avg_accuracy(self):
-        return self.training_sessions.aggregate(
-            avg=models.Avg("accuracy")
-        )["avg"] or 0
-    
-    # =========================================================================
-    # SUBSCRIPTION & TRIAL METHODS
-    # =========================================================================
+    # ─── SUBSCRIPTION & TRIAL METHODS ──────────────────────────────────────
     
     def get_active_trial(self, trial_type):
-        """Get active trial for a specific type"""
         try:
             trial = self.trials.get(trial_type=trial_type, used=False)
             if trial.is_valid():
@@ -277,27 +305,21 @@ class User(AbstractUser):
         return None
     
     def has_multiplication_trial(self):
-        """Check if user has active multiplication game trial"""
         trial = self.get_active_trial('multiplication')
         return trial is not None
     
     def has_curriculum_trial(self):
-        """Check if user has active curriculum trial"""
         trial = self.get_active_trial('curriculum')
         return trial is not None
     
     def get_user_subscription(self):
-        """Get or create user subscription"""
         subscription, created = UserSubscription.objects.get_or_create(
             user=self,
-            defaults={
-                'status': 'inactive',
-            }
+            defaults={'status': 'inactive'}
         )
         return subscription
     
     def has_active_subscription(self):
-        """Check if user has active paid subscription"""
         try:
             subscription = self.user_subscription
             return subscription.is_active() and subscription.status == 'active'
@@ -305,34 +327,22 @@ class User(AbstractUser):
             return False
     
     def can_access_belt(self, belt_id):
-        """Check if user can access a specific belt"""
-        # White and Yellow belts are always free
         if belt_id in ['white', 'yellow']:
             return True
-        
-        # Check for active multiplication trial (7 days)
         if self.has_multiplication_trial():
             return True
-        
-        # Check for active subscription
         return self.has_active_subscription()
     
     def can_access_curriculum(self):
-        """Check if user can access curriculum content (CBC, IGCSE, 8-4-4)"""
-        # Check for active curriculum trial (7 days)
         if self.has_curriculum_trial():
             return True
-        
-        # Check for active subscription
         return self.has_active_subscription()
     
     def get_multiplication_trial_days_remaining(self):
-        """Get days remaining in multiplication trial"""
         trial = self.get_active_trial('multiplication')
         return trial.days_remaining() if trial else 0
     
     def get_curriculum_trial_days_remaining(self):
-        """Get days remaining in curriculum trial"""
         trial = self.get_active_trial('curriculum')
         return trial.days_remaining() if trial else 0
 
@@ -341,24 +351,20 @@ class User(AbstractUser):
 # BELT PROGRESS
 # ─────────────────────────────────────────────────────────────────────────────
 class BeltProgress(models.Model):
-    """
-    One row per (user, belt) pair — 9 rows created automatically on student registration.
-    """
-
     STATUS_CHOICES = [
         ("locked", "Locked"),
         ("active", "Active"),
         ("passed", "Passed"),
     ]
 
-    user        = models.ForeignKey(User, on_delete=models.CASCADE, related_name="belt_progress")
-    belt_id     = models.CharField(max_length=10, choices=BELT_CHOICES, db_index=True)
-    status      = models.CharField(max_length=10, choices=STATUS_CHOICES, default="locked")
-    passed      = models.BooleanField(default=False)
-    attempts    = models.PositiveIntegerField(default=0)
-    best_acc    = models.FloatField(default=0.0)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="belt_progress")
+    belt_id = models.CharField(max_length=10, choices=BELT_CHOICES, db_index=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="locked")
+    passed = models.BooleanField(default=False)
+    attempts = models.PositiveIntegerField(default=0)
+    best_acc = models.FloatField(default=0.0)
     levels_done = models.JSONField(default=list)
-    updated_at  = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = [("user", "belt_id")]
@@ -405,13 +411,10 @@ class BeltProgress(models.Model):
         return table in self.levels_done
     
     def mark_passed(self):
-        """Mark this belt as passed and unlock next belt"""
         self.passed = True
         self.status = "passed"
         self.save()
-        
         self.user.update_current_belt()
-        
         idx = self.belt_index
         if idx + 1 < len(BELT_ORDER):
             next_id = BELT_ORDER[idx + 1]
@@ -429,15 +432,11 @@ class BeltProgress(models.Model):
 # FACT MEMORY
 # ─────────────────────────────────────────────────────────────────────────────
 class FactMemory(models.Model):
-    """
-    Tracks a user's history with every individual multiplication fact.
-    """
-
-    user          = models.ForeignKey(User, on_delete=models.CASCADE, related_name="fact_memory")
-    a             = models.PositiveSmallIntegerField()
-    b             = models.PositiveSmallIntegerField()
-    seen          = models.PositiveIntegerField(default=0)
-    correct       = models.PositiveIntegerField(default=0)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="fact_memory")
+    a = models.PositiveSmallIntegerField()
+    b = models.PositiveSmallIntegerField()
+    seen = models.PositiveIntegerField(default=0)
+    correct = models.PositiveIntegerField(default=0)
     total_time_ms = models.PositiveBigIntegerField(default=0)
 
     class Meta:
@@ -492,17 +491,13 @@ class FactMemory(models.Model):
 # TRAINING SESSION
 # ─────────────────────────────────────────────────────────────────────────────
 class TrainingSession(models.Model):
-    """
-    One row per completed training session.
-    """
-
-    user       = models.ForeignKey(User, on_delete=models.CASCADE, related_name="training_sessions")
-    belt_id    = models.CharField(max_length=10, choices=BELT_CHOICES)
-    passed     = models.BooleanField(default=False)
-    accuracy   = models.FloatField(default=0.0)
-    time_used  = models.PositiveIntegerField(default=0)
-    correct    = models.PositiveIntegerField(default=0)
-    total_q    = models.PositiveIntegerField(default=0)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="training_sessions")
+    belt_id = models.CharField(max_length=10, choices=BELT_CHOICES)
+    passed = models.BooleanField(default=False)
+    accuracy = models.FloatField(default=0.0)
+    time_used = models.PositiveIntegerField(default=0)
+    correct = models.PositiveIntegerField(default=0)
+    total_q = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
@@ -570,10 +565,8 @@ BADGE_DETAILS = {
 }
 
 class UserBadge(models.Model):
-    """Junction table for badges earned by users."""
-
-    user      = models.ForeignKey(User, on_delete=models.CASCADE, related_name="badges")
-    badge_id  = models.CharField(max_length=30, choices=BADGE_CHOICES)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="badges")
+    badge_id = models.CharField(max_length=30, choices=BADGE_CHOICES)
     earned_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -597,12 +590,8 @@ class UserBadge(models.Model):
 # STREAK
 # ─────────────────────────────────────────────────────────────────────────────
 class Streak(models.Model):
-    """
-    Tracks daily training streaks for students.
-    """
-
-    user      = models.OneToOneField(User, on_delete=models.CASCADE, related_name="streak")
-    count     = models.PositiveIntegerField(default=0)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="streak")
+    count = models.PositiveIntegerField(default=0)
     last_date = models.DateField(null=True, blank=True)
 
     class Meta:
@@ -613,7 +602,6 @@ class Streak(models.Model):
         return f"{self.user.display_name} — {self.count} days"
 
     def update(self):
-        """Call after a student completes any session."""
         today = date.today()
         if self.last_date == today:
             return self.count
@@ -643,20 +631,16 @@ class Streak(models.Model):
 # TUTOR REQUEST
 # ─────────────────────────────────────────────────────────────────────────────
 class TutorRequest(models.Model):
-    """
-    A student requests coaching from a tutor.
-    """
-
     STATUS_CHOICES = [
         ("pending",  "Pending"),
         ("accepted", "Accepted"),
         ("rejected", "Rejected"),
     ]
 
-    student    = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tutor_requests_sent")
-    tutor      = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tutor_requests_received")
-    status     = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pending", db_index=True)
-    message    = models.TextField(blank=True)
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tutor_requests_sent")
+    tutor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tutor_requests_received")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pending", db_index=True)
+    message = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -697,25 +681,23 @@ class TutorRequest(models.Model):
 # ASSIGNMENT
 # ─────────────────────────────────────────────────────────────────────────────
 class Assignment(models.Model):
-    """Test/Assignment created by tutor for student(s)."""
-
     STATUS_CHOICES = [
         ('draft', 'Draft'),
         ('published', 'Published'),
         ('archived', 'Archived'),
     ]
     
-    tutor       = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assignments_created')
-    student     = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assignments_received', null=True, blank=True)
-    title       = models.CharField(max_length=200)
+    tutor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assignments_created')
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assignments_received', null=True, blank=True)
+    title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    questions   = models.JSONField(default=list)
-    time_limit  = models.PositiveIntegerField(default=0, help_text="Time limit in minutes, 0 for no limit")
-    points      = models.PositiveIntegerField(default=100)
-    due_date    = models.DateTimeField(null=True, blank=True)
-    status      = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
-    created_at  = models.DateTimeField(auto_now_add=True)
-    updated_at  = models.DateTimeField(auto_now=True)
+    questions = models.JSONField(default=list)
+    time_limit = models.PositiveIntegerField(default=0, help_text="Time limit in minutes, 0 for no limit")
+    points = models.PositiveIntegerField(default=100)
+    due_date = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
         ordering = ['-created_at']
@@ -732,8 +714,6 @@ class Assignment(models.Model):
 # ASSIGNMENT SUBMISSION
 # ─────────────────────────────────────────────────────────────────────────────
 class AssignmentSubmission(models.Model):
-    """Student's submission for an assignment."""
-
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('submitted', 'Submitted'),
@@ -741,16 +721,16 @@ class AssignmentSubmission(models.Model):
         ('late', 'Late'),
     ]
     
-    assignment   = models.ForeignKey(Assignment, on_delete=models.CASCADE, related_name='submissions')
-    student      = models.ForeignKey(User, on_delete=models.CASCADE, related_name='submissions')
-    answers      = models.JSONField(default=list)
-    score        = models.PositiveIntegerField(default=0)
-    feedback     = models.TextField(blank=True)
-    status       = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
-    started_at   = models.DateTimeField(auto_now_add=True)
+    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, related_name='submissions')
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='submissions')
+    answers = models.JSONField(default=list)
+    score = models.PositiveIntegerField(default=0)
+    feedback = models.TextField(blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    started_at = models.DateTimeField(auto_now_add=True)
     submitted_at = models.DateTimeField(null=True, blank=True)
-    graded_at    = models.DateTimeField(null=True, blank=True)
-    is_read      = models.BooleanField(default=False)
+    graded_at = models.DateTimeField(null=True, blank=True)
+    is_read = models.BooleanField(default=False)
     
     class Meta:
         ordering = ['-submitted_at']
@@ -770,19 +750,16 @@ class AssignmentSubmission(models.Model):
 # CHAT MESSAGE
 # ─────────────────────────────────────────────────────────────────────────────
 class ChatMessage(models.Model):
-    """Chat messages between tutor and student with file attachment support."""
-
-    sender    = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
-    message   = models.TextField()
-    is_read   = models.BooleanField(default=False)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     
-    # File attachment fields
     attachment = models.FileField(upload_to='chat_attachments/%Y/%m/%d/', null=True, blank=True)
     attachment_name = models.CharField(max_length=255, blank=True)
     attachment_size = models.PositiveIntegerField(default=0)
-    attachment_type = models.CharField(max_length=50, blank=True)  # image, pdf, video, file
+    attachment_type = models.CharField(max_length=50, blank=True)
     
     class Meta:
         ordering = ['created_at']
@@ -803,11 +780,9 @@ class ChatMessage(models.Model):
 # NOTE
 # ─────────────────────────────────────────────────────────────────────────────
 class Note(models.Model):
-    """Notes/feedback from tutor to student."""
-
-    tutor     = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notes_written')
-    student   = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notes_received')
-    content   = models.TextField()
+    tutor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notes_written')
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notes_received')
+    content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -822,7 +797,6 @@ class Note(models.Model):
 # TUTOR INTEREST
 # ─────────────────────────────────────────────────────────────────────────────
 class TutorInterest(models.Model):
-    """Stores emails from users interested in tutor features (coming soon)"""
     email = models.EmailField(db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -839,9 +813,6 @@ class TutorInterest(models.Model):
 # PASSWORD RESET TOKEN
 # ─────────────────────────────────────────────────────────────────────────────
 class PasswordResetToken(models.Model):
-    """
-    Model to store password reset tokens
-    """
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reset_tokens')
     token = models.CharField(max_length=100, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -849,7 +820,6 @@ class PasswordResetToken(models.Model):
     used = models.BooleanField(default=False)
     
     def is_valid(self):
-        """Check if token is still valid"""
         return not self.used and self.expires_at > timezone.now()
     
     def save(self, *args, **kwargs):
@@ -867,7 +837,6 @@ class PasswordResetToken(models.Model):
 # PARENT/STUDENT LINKING
 # ─────────────────────────────────────────────────────────────────────────────
 class ParentStudentLink(models.Model):
-    """Link between parent and student accounts"""
     parent = models.ForeignKey(User, on_delete=models.CASCADE, related_name='linked_children')
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='linked_parents')
     relationship = models.CharField(max_length=50, choices=[
@@ -892,7 +861,6 @@ class ParentStudentLink(models.Model):
 # STUDENT ACTIVITY LOG
 # ─────────────────────────────────────────────────────────────────────────────
 class StudentActivityLog(models.Model):
-    """Track student login and activity time"""
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='activity_logs')
     login_time = models.DateTimeField(auto_now_add=True)
     logout_time = models.DateTimeField(null=True, blank=True)
@@ -916,7 +884,6 @@ class StudentActivityLog(models.Model):
 # PARENT NOTIFICATION
 # ─────────────────────────────────────────────────────────────────────────────
 class ParentNotification(models.Model):
-    """Notifications for parents"""
     parent = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
     student = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='parent_notifications')
     title = models.CharField(max_length=200)
@@ -940,11 +907,10 @@ class ParentNotification(models.Model):
 
 
 # =============================================================================
-# CONTENT MANAGEMENT MODELS (PDF to Quiz System)
+# CONTENT MANAGEMENT MODELS
 # =============================================================================
 
 class Curriculum(models.Model):
-    """Curriculum system like CBC, 8-4-4, IGCSE"""
     name = models.CharField(max_length=100)
     code = models.CharField(max_length=20, unique=True)
     description = models.TextField(blank=True)
@@ -962,7 +928,6 @@ class Curriculum(models.Model):
 
 
 class Grade(models.Model):
-    """Grade/Form level within curriculum"""
     curriculum = models.ForeignKey(Curriculum, on_delete=models.CASCADE, related_name='grades')
     name = models.CharField(max_length=50)
     level_order = models.IntegerField(default=0)
@@ -979,7 +944,6 @@ class Grade(models.Model):
 
 
 class Subject(models.Model):
-    """Subjects like Mathematics, English, etc."""
     name = models.CharField(max_length=100)
     code = models.CharField(max_length=20, unique=True)
     icon = models.CharField(max_length=50, blank=True)
@@ -997,7 +961,6 @@ class Subject(models.Model):
 
 
 class Topic(models.Model):
-    """Topics within subjects (e.g., Algebra under Mathematics)"""
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='topics')
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
@@ -1015,7 +978,6 @@ class Topic(models.Model):
 
 
 class ContentItem(models.Model):
-    """Main content container for past papers, quizzes, assignments"""
     CONTENT_TYPES = [
         ('past_paper', 'Past Paper'),
         ('quiz', 'Quiz'),
@@ -1037,36 +999,23 @@ class ContentItem(models.Model):
         (4, 'Expert'),
     ]
     
-    # Basic info
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     content_type = models.CharField(max_length=20, choices=CONTENT_TYPES, default='quiz')
-    
-    # Curriculum targeting
     curriculum = models.ForeignKey(Curriculum, on_delete=models.SET_NULL, null=True, blank=True)
     grade = models.ForeignKey(Grade, on_delete=models.SET_NULL, null=True, blank=True)
     subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, blank=True)
     topic = models.ForeignKey(Topic, on_delete=models.SET_NULL, null=True, blank=True)
-    
-    # Difficulty and timing
     difficulty = models.IntegerField(default=1, choices=DIFFICULTY_CHOICES)
     time_limit_minutes = models.IntegerField(default=0, help_text="0 = no limit")
     total_marks = models.IntegerField(default=0)
-    
-    # Files
     source_pdf = models.FileField(upload_to='content_pdfs/%Y/%m/', null=True, blank=True)
     extracted_text = models.TextField(blank=True, help_text="OCR extracted text from PDF")
-    
-    # Status
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
-    
-    # Tracking
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_content')
     published_at = models.DateTimeField(null=True, blank=True)
-    
-    # Stats
     view_count = models.IntegerField(default=0)
     attempt_count = models.IntegerField(default=0)
     average_score = models.FloatField(default=0)
@@ -1093,7 +1042,6 @@ class ContentItem(models.Model):
         return dict(self.DIFFICULTY_CHOICES).get(self.difficulty, 'Easy')
     
     def update_total_marks(self):
-        """Calculate total marks from all questions"""
         total = self.questions.aggregate(total=models.Sum('marks'))['total'] or 0
         self.total_marks = total
         self.save(update_fields=['total_marks'])
@@ -1103,7 +1051,6 @@ class ContentItem(models.Model):
 
 
 class Question(models.Model):
-    """Questions within content items"""
     QUESTION_TYPES = [
         ('mcq', 'Multiple Choice'),
         ('short_answer', 'Short Answer'),
@@ -1111,42 +1058,22 @@ class Question(models.Model):
     ]
     
     content_item = models.ForeignKey(ContentItem, on_delete=models.CASCADE, related_name='questions')
-    
     question_text = models.TextField()
     question_type = models.CharField(max_length=20, choices=QUESTION_TYPES, default='mcq')
-    
-    # For multiple choice
     option_a = models.CharField(max_length=500, blank=True)
     option_b = models.CharField(max_length=500, blank=True)
     option_c = models.CharField(max_length=500, blank=True)
     option_d = models.CharField(max_length=500, blank=True)
-    
-    # Correct answer for auto-grading
     correct_answer = models.TextField()
-    
-    # Scoring
     marks = models.IntegerField(default=1, validators=[MinValueValidator(1)])
-    
-    # For essay questions - teacher will grade manually
     requires_manual_grading = models.BooleanField(default=False)
-    
-    # Optional explanation after answering
     explanation = models.TextField(blank=True)
-    
-    # Order within the content
     order = models.IntegerField(default=0)
-    
-    # Difficulty specific to this question
     difficulty = models.IntegerField(default=1, choices=ContentItem.DIFFICULTY_CHOICES)
-    
-    # ========== FIELD: REQUIRES FILE UPLOAD ==========
     requires_upload = models.BooleanField(
         default=False,
         help_text="Student must upload a working file to answer this question"
     )
-    # ======================================================
-    
-    # Stats
     times_answered = models.IntegerField(default=0)
     times_correct = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -1163,7 +1090,6 @@ class Question(models.Model):
         return f"Q{self.order}: {self.question_text[:50]}"
     
     def get_options_list(self):
-        """Return list of non-empty options"""
         options = []
         for letter in ['A', 'B', 'C', 'D']:
             opt = getattr(self, f'option_{letter.lower()}')
@@ -1172,14 +1098,12 @@ class Question(models.Model):
         return options
     
     def get_accuracy(self):
-        """Calculate accuracy percentage"""
         if self.times_answered == 0:
             return 0
         return (self.times_correct / self.times_answered) * 100
 
 
 class StudentQuizAttempt(models.Model):
-    """Track student attempts on content items"""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='quiz_attempts')
     content_item = models.ForeignKey(ContentItem, on_delete=models.CASCADE, related_name='attempts')
     score = models.IntegerField(default=0)
@@ -1209,7 +1133,6 @@ class StudentQuizAttempt(models.Model):
 
 
 class StudentAnswerDetail(models.Model):
-    """Detailed answers for each question in an attempt"""
     attempt = models.ForeignKey(StudentQuizAttempt, on_delete=models.CASCADE, related_name='answer_details')
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     user_answer = models.TextField()
@@ -1226,11 +1149,7 @@ class StudentAnswerDetail(models.Model):
         return f"{self.attempt.user.email} - Q{self.question.order} - {'✓' if self.is_correct else '✗'}"
 
 
-# =============================================================================
-# STUDENT ANSWER ATTACHMENT MODEL (for file uploads)
-# =============================================================================
 class StudentAnswerAttachment(models.Model):
-    """File attachments uploaded by students for specific questions"""
     answer_detail = models.ForeignKey(
         StudentAnswerDetail, 
         on_delete=models.CASCADE, 
@@ -1263,11 +1182,10 @@ class StudentAnswerAttachment(models.Model):
 
 
 # =============================================================================
-# USER TRIAL MODEL (for 7-day trials)
+# USER TRIAL MODEL
 # =============================================================================
 
 class UserTrial(models.Model):
-    """Track trial periods for different features"""
     TRIAL_TYPES = [
         ('multiplication', 'Multiplication Game (Blue Belt+)'),
         ('curriculum', 'Curriculum Content (CBC/IGCSE/8-4-4)'),
@@ -1293,29 +1211,24 @@ class UserTrial(models.Model):
         return f"{self.user.email} - {self.get_trial_type_display()} - {self.days_remaining()} days left"
     
     def is_valid(self):
-        """Check if trial is still valid (not used and not expired)"""
         return not self.used and timezone.now() < self.end_date
     
     def days_remaining(self):
-        """Get days remaining in trial"""
         if self.end_date:
             return max(0, (self.end_date - timezone.now()).days)
         return 0
     
     def hours_remaining(self):
-        """Get hours remaining in trial"""
         if self.end_date:
             remaining = self.end_date - timezone.now()
             return max(0, int(remaining.total_seconds() / 3600))
         return 0
     
     def mark_used(self):
-        """Mark trial as used"""
         self.used = True
         self.save()
     
     def extend(self, days=7):
-        """Extend trial by specified days"""
         self.end_date = timezone.now() + timedelta(days=days)
         self.used = False
         self.save()
@@ -1323,11 +1236,10 @@ class UserTrial(models.Model):
 
 
 # =============================================================================
-# SUBSCRIPTION MODELS (ONE unified subscription system)
+# SUBSCRIPTION MODELS
 # =============================================================================
 
 class SubscriptionPlan(models.Model):
-    """Subscription plans with pricing and duration"""
     PLAN_TYPES = [
         ('monthly', 'Monthly'),
         ('half_yearly', '6 Months'),
@@ -1357,17 +1269,13 @@ class SubscriptionPlan(models.Model):
     
     def save(self, *args, **kwargs):
         from decimal import Decimal
-        
-        # Auto-calculate savings if monthly plan exists
         if self.name != 'monthly':
             try:
                 monthly = SubscriptionPlan.objects.get(name='monthly')
-                # Convert to Decimal for consistent arithmetic
                 monthly_price_usd = Decimal(str(monthly.price_usd))
                 monthly_price_kes = Decimal(str(monthly.price_kes))
                 current_price_usd = Decimal(str(self.price_usd))
                 current_price_kes = Decimal(str(self.price_kes))
-                
                 if self.name == 'half_yearly':
                     self.savings_usd = (monthly_price_usd * Decimal('6')) - current_price_usd
                     self.savings_kes = (monthly_price_kes * Decimal('6')) - current_price_kes
@@ -1380,7 +1288,6 @@ class SubscriptionPlan(models.Model):
 
 
 class UserSubscription(models.Model):
-    """Enhanced user subscription with auto-renewal - ONE model for both systems"""
     STATUS_CHOICES = [
         ('active', 'Active'),
         ('expired', 'Expired'),
@@ -1391,27 +1298,17 @@ class UserSubscription(models.Model):
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user_subscription')
     plan = models.ForeignKey(SubscriptionPlan, on_delete=models.SET_NULL, null=True, blank=True)
-    
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='inactive')
-    
-    # Date tracking
     start_date = models.DateTimeField(auto_now_add=True)
     end_date = models.DateTimeField(null=True, blank=True)
-    
-    # Payment tracking
     last_payment_date = models.DateTimeField(null=True, blank=True)
     next_payment_date = models.DateTimeField(null=True, blank=True)
-    
-    # Auto-renewal settings
     auto_renew = models.BooleanField(default=True)
     cancel_at_period_end = models.BooleanField(default=False)
-    
-    # Paystack references
     paystack_subscription_code = models.CharField(max_length=100, blank=True)
     paystack_customer_code = models.CharField(max_length=100, blank=True)
     paystack_authorization_code = models.CharField(max_length=100, blank=True)
     paystack_reference = models.CharField(max_length=100, blank=True)
-    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -1429,7 +1326,6 @@ class UserSubscription(models.Model):
         return f"{self.user.email} - {plan_name} - {self.status}"
     
     def is_active(self):
-        """Check if subscription is currently active"""
         if self.status == 'active':
             if not self.end_date:
                 return False
@@ -1437,63 +1333,47 @@ class UserSubscription(models.Model):
         return False
     
     def days_remaining(self):
-        """Get days remaining in subscription"""
         if self.status == 'active' and self.end_date:
             remaining = (self.end_date - timezone.now()).days
             return max(0, remaining)
         return 0
     
     def get_status_display_text(self):
-        """Get human-readable status with days remaining"""
         if self.status == 'active' and self.is_active():
             days = self.days_remaining()
             return f"✅ Premium Active - {days} days remaining"
-        
         if self.status == 'expired':
             return "⏰ Subscription Expired - Upgrade to continue"
-        
         if self.status == 'cancelled':
             return "❌ Subscription Cancelled"
-        
         return "⚠️ Free Tier - Subscribe for full access"
     
     def has_premium_access(self):
-        """Check if user has access to premium content"""
         return self.is_active() and self.status == 'active'
     
     def extend_subscription(self, plan, duration_days):
-        """Extend or renew subscription"""
         self.plan = plan
         self.status = 'active'
-        
         if self.end_date and self.end_date > timezone.now():
-            # Extend existing subscription
             self.end_date = self.end_date + timedelta(days=duration_days)
         else:
-            # Start new subscription period
             self.end_date = timezone.now() + timedelta(days=duration_days)
-        
         self.start_date = timezone.now()
         self.last_payment_date = timezone.now()
         self.next_payment_date = self.end_date
         self.cancel_at_period_end = False
         self.save()
-        
-        # Update user's is_paid flag
         self.user.is_paid = True
         self.user.save(update_fields=['is_paid'])
-        
         return True
     
     def cancel_auto_renew(self):
-        """Cancel auto-renewal"""
         self.auto_renew = False
         self.cancel_at_period_end = True
         self.save()
         return True
     
     def expire(self):
-        """Expire the subscription"""
         self.status = 'expired'
         self.save()
         self.user.is_paid = False
@@ -1502,7 +1382,6 @@ class UserSubscription(models.Model):
 
 
 class PaymentTransaction(models.Model):
-    """Payment transaction tracking"""
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('success', 'Success'),
@@ -1519,25 +1398,16 @@ class PaymentTransaction(models.Model):
     
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='payment_transactions')
     subscription = models.ForeignKey(UserSubscription, on_delete=models.SET_NULL, null=True, blank=True, related_name='transactions')
-    
     transaction_type = models.CharField(max_length=20, choices=TRANSACTION_TYPE_CHOICES, default='initial')
     reference = models.CharField(max_length=100, unique=True, db_index=True)
     access_code = models.CharField(max_length=100, blank=True)
-    
-    # Payment details
     amount_usd = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     amount_kes = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     currency = models.CharField(max_length=3, default='KES')
-    
-    # Plan details
     plan = models.ForeignKey(SubscriptionPlan, on_delete=models.SET_NULL, null=True)
     duration_days = models.IntegerField(default=30)
-    
-    # Status tracking
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     paystack_response = models.JSONField(default=dict)
-    
-    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
     
@@ -1554,14 +1424,12 @@ class PaymentTransaction(models.Model):
         return f"{self.user.email} - {self.reference} - {self.status}"
     
     def mark_success(self):
-        """Mark transaction as successful"""
         self.status = 'success'
         self.completed_at = timezone.now()
         self.save()
         return True
     
     def mark_failed(self):
-        """Mark transaction as failed"""
         self.status = 'failed'
         self.completed_at = timezone.now()
         self.save()
@@ -1569,23 +1437,17 @@ class PaymentTransaction(models.Model):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# DEVELOPER HUB — student coding sandbox (Phase 1: HTML/CSS/JS only)
+# DEVELOPER HUB
 # ─────────────────────────────────────────────────────────────────────────────
-from django.utils.text import slugify
-
 
 class DevProject(models.Model):
-    """A single student-built HTML/CSS/JS project inside the Developer Hub."""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='dev_projects')
     title = models.CharField(max_length=150, default="Untitled Project")
     slug = models.SlugField(max_length=170, unique=True, blank=True, null=True, db_index=True)
-
     html_code = models.TextField(blank=True, default='')
     css_code = models.TextField(blank=True, default='')
     js_code = models.TextField(blank=True, default='')
-
     is_published = models.BooleanField(default=False, db_index=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -1601,7 +1463,6 @@ class DevProject(models.Model):
         return f"{self.user.email} - {self.title}"
 
     def generate_unique_slug(self):
-        """Builds a unique, URL-safe slug from the project title for publishing."""
         base = slugify(self.title) or "project"
         slug = base
         counter = 1
@@ -1616,10 +1477,10 @@ class DevProject(models.Model):
 
 
 class DevAsset(models.Model):
-    """Image/asset uploaded by a student for use inside a Developer Hub project."""
     project = models.ForeignKey(DevProject, on_delete=models.CASCADE, related_name='assets')
     file = models.FileField(upload_to='dev_assets/%Y/%m/%d/')
     original_filename = models.CharField(max_length=255, blank=True)
+    folder = models.CharField(max_length=255, blank=True, default='') 
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -1631,6 +1492,49 @@ class DevAsset(models.Model):
         return f"{self.project.title} - {self.original_filename or self.file.name}"
 
 
+class DevFile(models.Model):
+    """A single file inside a DevProject (index.html, style.css, app.js, etc.)."""
+    project = models.ForeignKey(
+        DevProject, on_delete=models.CASCADE, related_name='files'
+    )
+    path = models.CharField(max_length=255, help_text="e.g. index.html, styles/main.css")
+    content = models.TextField(blank=True, default='')
+    is_entry = models.BooleanField(
+        default=False,
+        help_text="If True, this file is rendered in the live preview iframe."
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = [('project', 'path')]
+        ordering = ['path']
+        verbose_name = "Developer File"
+        verbose_name_plural = "Developer Files"
+        indexes = [
+            models.Index(fields=['project', 'path']),
+        ]
+
+    def __str__(self):
+        return f"{self.project.title} / {self.path}"
+
+    @property
+    def extension(self):
+        return self.path.rsplit('.', 1)[-1].lower() if '.' in self.path else ''
+
+    @property
+    def language(self):
+        return {
+            'html': 'html', 'htm': 'html',
+            'css': 'css',
+            'js': 'javascript', 'mjs': 'javascript',
+            'json': 'json',
+            'md': 'markdown',
+            'svg': 'xml',
+            'txt': 'plaintext',
+        }.get(self.extension, 'plaintext')
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # SIGNALS
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1639,9 +1543,7 @@ from django.dispatch import receiver
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
-    """Create initial belt progress, streak, subscription, and trials when a new student registers."""
     if created and instance.role == "student":
-        # Create belt progress for all belts
         for i, belt_id in enumerate(BELT_ORDER):
             status = "active" if i == 0 else "locked"
             BeltProgress.objects.create(
@@ -1653,25 +1555,14 @@ def create_user_profile(sender, instance, created, **kwargs):
                 best_acc=0,
                 levels_done=[]
             )
-        
-        # Create streak
         Streak.objects.create(user=instance, count=0, last_date=None)
-        
-        # Create subscription (inactive until paid)
-        UserSubscription.objects.create(
-            user=instance,
-            status='inactive'
-        )
-        
-        # Create 7-day trial for multiplication game (Blue belt+)
+        UserSubscription.objects.create(user=instance, status='inactive')
         UserTrial.objects.create(
             user=instance,
             trial_type='multiplication',
             end_date=timezone.now() + timedelta(days=7),
             used=False
         )
-        
-        # Create 7-day trial for curriculum content (CBC/8-4-4/IGCSE)
         UserTrial.objects.create(
             user=instance,
             trial_type='curriculum',
@@ -1682,7 +1573,6 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=TrainingSession)
 def update_streak_on_session(sender, instance, created, **kwargs):
-    """Update streak when a new training session is created."""
     if created:
         streak, _ = Streak.objects.get_or_create(user=instance.user)
         streak.update()

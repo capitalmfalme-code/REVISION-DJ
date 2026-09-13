@@ -6,10 +6,11 @@ Main settings file. Environment-aware:
   - safe defaults for local development
   - production checklist items clearly commented
   - Supports both SQLite (local) and PostgreSQL (Railway production)
+  - Email via Resend HTTPS API (works on Railway Hobby/Free — SMTP is blocked)
 
 Usage:
   Local dev  →  python manage.py runserver (uses SQLite)
-  Production →  set DATABASE_URL env var, then gunicorn timesdojo.wsgi (uses PostgreSQL)
+  Production →  set DATABASE_URL + RESEND_API_KEY env vars, then gunicorn timesdojo.wsgi
 """
 
 import os
@@ -37,28 +38,23 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
 # =============================================================================
 # ALLOWED_HOSTS - MUST include Railway domain and any custom domains
 # =============================================================================
-# Get allowed hosts from environment variable, with defaults for local and Railway
 ALLOWED_HOSTS_ENV = os.environ.get("DJANGO_ALLOWED_HOSTS", "")
 
 if ALLOWED_HOSTS_ENV:
     ALLOWED_HOSTS = ALLOWED_HOSTS_ENV.split(",")
 else:
-    # Default for local development
     ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
-# Add all domains (Railway and custom domain)
 ALLOWED_HOSTS.extend([
     # Railway domains
     "mfalme-premium-dojo-production.up.railway.app",
     "web-production-d50e9.up.railway.app",
     ".railway.app",
     ".up.railway.app",
-    
+
     # Custom domain
     "revisionea.online",
     "www.revisionea.online",
-    "https://www.revisionea.online",
-    "revisionea.online",
 ])
 
 # Remove duplicates while preserving order
@@ -73,26 +69,21 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 APPEND_SLASH = False
 
 # ─────────────────────────────────────────────────────────────────────────────
-# CSRF TRUSTED ORIGINS - Required for Railway and custom domains
+# CSRF TRUSTED ORIGINS
 # ─────────────────────────────────────────────────────────────────────────────
 CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if os.environ.get("CSRF_TRUSTED_ORIGINS") else []
 
-# Add all domains to CSRF trusted origins
 CSRF_TRUSTED_ORIGINS.extend([
-    # Railway domains
     "https://mfalme-premium-dojo-production.up.railway.app",
     "https://web-production-d50e9.up.railway.app",
     "https://*.railway.app",
     "https://*.up.railway.app",
-    
-    # Custom domain
     "https://revisionea.online",
     "https://www.revisionea.online",
     "http://revisionea.online",
     "http://www.revisionea.online",
 ])
 
-# Add HTTP versions for local development if needed
 if DEBUG:
     CSRF_TRUSTED_ORIGINS.extend([
         "http://mfalme-premium-dojo-production.up.railway.app",
@@ -101,7 +92,6 @@ if DEBUG:
         "http://127.0.0.1:8000",
     ])
 
-# Remove duplicates and empty strings
 CSRF_TRUSTED_ORIGINS = [origin for origin in set(CSRF_TRUSTED_ORIGINS) if origin]
 
 # Media and static files
@@ -110,8 +100,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DAILY_API_KEY = "e13401dd1b121ba5f8cdd61e80aaf3c5916335947301044963217ed8e283e157"
 
 # Paystack Configuration
-PAYSTACK_SECRET_KEY = "sk_live_fc4f550a27a942bc0f6ce014c57b1834c4b6195d"  
-PAYSTACK_PUBLIC_KEY = "pk_live_197cf61799bc7493f737268952280f5da78cc7a4"  
+PAYSTACK_SECRET_KEY = "sk_live_fc4f550a27a942bc0f6ce014c57b1834c4b6195d"
+PAYSTACK_PUBLIC_KEY = "pk_live_197cf61799bc7493f737268952280f5da78cc7a4"
 
 # Subscription prices in USD
 SUBSCRIPTION_PRICES = {
@@ -142,6 +132,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # Third-party
+    "anymail",  # Resend HTTPS email backend
     # Our app
     "dojo",
 ]
@@ -196,28 +188,20 @@ WSGI_APPLICATION = "timesdojo.wsgi.application"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # DATABASE
-# Automatically switches between SQLite and PostgreSQL based on DATABASE_URL
-# For local development: uses SQLite (no DATABASE_URL needed)
-# For Railway production: set DATABASE_URL environment variable
 # ─────────────────────────────────────────────────────────────────────────────
-
-# Try to get database URL from environment (Railway sets this automatically)
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
 
-# Check if we're running on Railway (has DATABASE_URL)
 if DATABASE_URL:
-    # Production: PostgreSQL on Railway
     print(f"✅ Using PostgreSQL database from Railway", file=sys.stderr)
     DATABASES = {
         "default": dj_database_url.config(
             default=DATABASE_URL,
             conn_max_age=600,
             conn_health_checks=True,
-            ssl_require=True  # Railway requires SSL
+            ssl_require=True
         )
     }
 else:
-    # Local development: SQLite
     print("📁 Using SQLite database for local development", file=sys.stderr)
     DATABASES = {
         "default": {
@@ -251,7 +235,6 @@ SESSION_COOKIE_AGE = 60 * 60 * 24 * 7   # 7 days
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
 
-# In production with HTTPS, set secure cookies
 if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
@@ -332,33 +315,56 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
 
 
-    # Email settings (configure based on your email provider)
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'  # or your email provider
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'inforevisionea@gmail.com')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'tgzxwwvthvsuygwj')
-DEFAULT_FROM_EMAIL = 'Revision Dojo <inforevisionea@gmail.com>'
+# ─────────────────────────────────────────────────────────────────────────────
+# EMAIL — Resend HTTPS API (works on Railway Hobby/Free plans)
+# ─────────────────────────────────────────────────────────────────────────────
+# Railway Hobby/Free blocks outbound SMTP (ports 25, 465, 587). Resend uses
+# HTTPS (port 443), which Railway never blocks.
+#
+# Domain "revisionea.online" is verified in Resend, so we send from a real
+# address on that domain instead of onboarding@resend.dev.
+#
+# Railway Variables to set:
+#   RESEND_API_KEY        → re_xxxxxxxxxxxx
+#   DEFAULT_FROM_EMAIL    → Revision Dojo <noreply@revisionea.online>
+#   SITE_URL              → https://www.revisionea.online
+#   DJANGO_DEBUG          → False
+#
+# IMPORTANT: keep the display name simple. Resend rejects certain punctuation
+# (em dashes, unusual chars) inside the display name.
 
-# Site URL for password reset links
-SITE_URL = os.environ.get('SITE_URL', 'https//www.revisionea.online')
+EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
+
+ANYMAIL = {
+    "RESEND_API_KEY": os.environ.get("RESEND_API_KEY", ""),
+}
+
+DEFAULT_FROM_EMAIL = os.environ.get(
+    "DEFAULT_FROM_EMAIL",
+    "Revision Dojo <noreply@revisionea.online>"
+)
+
+# Site URL for password reset links and email CTAs
+SITE_URL = os.environ.get("SITE_URL", "https://www.revisionea.online")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SUBSCRIPTION PRICING (KES conversion)
+# ─────────────────────────────────────────────────────────────────────────────
 USD_TO_KES_RATE = 130
-# Subscription prices in USD (original)
+
 SUBSCRIPTION_PRICES_USD = {
     'monthly': 5.00,
     'half_yearly': 25.00,
     'yearly': 50.00,
 }
 
-# Subscription prices in KES (calculated)
 SUBSCRIPTION_PRICES = {
-    'monthly': 5.00 * USD_TO_KES_RATE,  # 650 KES
+    'monthly': 5.00 * USD_TO_KES_RATE,       # 650 KES
     'half_yearly': 25.00 * USD_TO_KES_RATE,  # 3,250 KES
-    'yearly': 50.00 * USD_TO_KES_RATE,  # 6,500 KES
+    'yearly': 50.00 * USD_TO_KES_RATE,       # 6,500 KES
 }
 
-# Subscription durations in days (unchanged)
 SUBSCRIPTION_DURATIONS = {
     'monthly': 30,
     'half_yearly': 180,

@@ -1,0 +1,173 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coding Hub Access Suspended — Revision Dojo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: #eef6ff;
+      color: #1a2638;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .suspended-container {
+      background: #fff;
+      border-radius: 24px;
+      padding: 48px 40px;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 8px 40px rgba(26,58,107,.15);
+      text-align: center;
+    }
+    .suspended-icon {
+      font-size: 72px;
+      color: #e53935;
+      margin-bottom: 20px;
+    }
+    .suspended-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 28px;
+      color: #1a3a6b;
+      margin-bottom: 12px;
+    }
+    .suspended-subtitle {
+      font-size: 16px;
+      color: #3b4d63;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+    .suspended-reason {
+      background: #fff3f3;
+      border: 2px solid #ffcdd2;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+    .suspended-reason-label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #7088a0;
+      margin-bottom: 4px;
+    }
+    .suspended-reason-text {
+      font-weight: 600;
+      color: #1a2638;
+    }
+    .suspended-meta {
+      font-size: 13px;
+      color: #7088a0;
+      margin-bottom: 28px;
+    }
+    .suspended-meta strong {
+      color: #1a3a6b;
+    }
+    .btn-primary {
+      background: #1a3a6b;
+      color: #fff;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 99px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all .2s;
+    }
+    .btn-primary:hover {
+      background: #234d96;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(26,58,107,.3);
+    }
+    .btn-secondary {
+      background: #eef6ff;
+      color: #1a3a6b;
+      border: 2px solid #d0e8fa;
+      padding: 12px 28px;
+      border-radius: 99px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all .2s;
+      margin-left: 12px;
+    }
+    .btn-secondary:hover {
+      background: #d0e8fa;
+      border-color: #b8d8f5;
+    }
+    .suspended-footer {
+      margin-top: 24px;
+      font-size: 12px;
+      color: #7088a0;
+    }
+    .suspended-footer a {
+      color: #1a3a6b;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .suspended-footer a:hover {
+      text-decoration: underline;
+    }
+    @media (max-width: 480px) {
+      .suspended-container { padding: 32px 20px; }
+      .suspended-title { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="suspended-container">
+    <div class="suspended-icon"><i class="fas fa-lock"></i></div>
+    <h1 class="suspended-title">Coding Hub Access Suspended</h1>
+    <p class="suspended-subtitle">
+      Your access to the Coding Hub has been temporarily suspended by an administrator.
+    </p>
+    
+    {% if reason %}
+    <div class="suspended-reason">
+      <div class="suspended-reason-label"><i class="fas fa-info-circle"></i> Reason for suspension</div>
+      <div class="suspended-reason-text">{{ reason }}</div>
+    </div>
+    {% endif %}
+    
+    <div class="suspended-meta">
+      {% if suspended_at %}
+        Suspended on: <strong>{{ suspended_at|date:"F j, Y, g:i A" }}</strong><br>
+      {% endif %}
+      {% if suspended_by %}
+        By: <strong>{{ suspended_by }}</strong>
+      {% endif %}
+    </div>
+    
+    <div>
+      <a href="{% url 'dojo:home' %}" class="btn-primary">
+        <i class="fas fa-arrow-left"></i> Return to Dashboard
+      </a>
+      <a href="#" class="btn-secondary" onclick="event.preventDefault();location.reload();">
+        <i class="fas fa-sync-alt"></i> Try Again
+      </a>
+    </div>
+    
+    <div class="suspended-footer">
+      If you believe this is a mistake, please contact support at 
+      <a href="mailto:support@revisiondojo.com">support@revisiondojo.com</a>
+    </div>
+  </div>
+</body>
+</html>

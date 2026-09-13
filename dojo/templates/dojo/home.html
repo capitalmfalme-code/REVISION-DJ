@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>TimesTable Dojo — Master Multiplication</title>
+<title>Revision Dojo — Sharpen Every Skill</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
@@ -60,8 +60,6 @@ a{text-decoration:none}
 .land-title span{color:var(--gold)}
 .land-sub{font-size:clamp(14px,3vw,18px);font-weight:600;color:rgba(255,255,255,.75);max-width:520px;margin:0 auto 32px}
 .land-cta-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:48px}
-.land-belts{display:flex;gap:6px;justify-content:center}
-.lbp{height:10px;border-radius:99px;flex:1;max-width:34px}
 .land-stats{display:grid;grid-template-columns:repeat(3,1fr);background:var(--navy);border-top:3px solid var(--gold)}
 .lst{padding:22px 16px;text-align:center;border-right:1px solid rgba(255,255,255,.08)}
 .lst:last-child{border-right:none}
@@ -404,29 +402,28 @@ a{text-decoration:none}
   </div>
   
   <div class="land-hero-body">
-    <div class="land-badge">The #1 Multiplication Platform for Schools</div>
-    <div class="land-title">Master Your<br><span>Times Tables</span><br>Earn Your Belt</div>
-    <div class="land-sub">9 belt levels from White to Master. Timed belt sessions, skip mechanics, real competition. Multiplication up to ×20.</div>
+    <div class="land-badge">Learning That Feels Like a Game</div>
+    <div class="land-title">Turn Study Time<br>Into <span>Game Time</span></div>
+    <div class="land-sub">Score points, chase daily streaks, level up and beat the clock as you go. Revision Dojo takes Math, Sciences, Languages and Tech and turns them into fast, addictive challenges — the kind you actually want to finish, not just survive.</div>
     <div class="land-cta-row">
       <a href="{% url 'dojo:register' %}" class="btn btn-gold" style="font-size:18px;padding:15px 32px">▶ Start Free</a>
     </div>
-    <div class="land-belts" id="landBeltPips"></div>
   </div>
 </div>
 <div class="land-stats">
   <div class="lst"><div class="lst-n" id="landStudents">—</div><div class="lst-l">Students</div></div>
-  <div class="lst"><div class="lst-n" id="landBelts">—</div><div class="lst-l">Belts Earned</div></div>
+  <div class="lst"><div class="lst-n" id="landBelts">—</div><div class="lst-l">Topics Covered</div></div>
   <div class="lst"><div class="lst-n" id="landQ">—</div><div class="lst-l">Questions Answered</div></div>
 </div>
 
 <!-- Features Section - 4 Cards in One Row -->
 <div class="land-features">
-  <div class="land-features-title">Everything a Student Needs</div>
+  <div class="land-features-title">Revision That Doesn't Feel Like Revision</div>
   <div class="feat-grid">
-    <div class="feat-card fc-g"><div class="feat-icon" style="background:rgba(255,193,7,.12)">★</div><div class="feat-title">Belt System</div><div class="feat-desc">9 progressive belts. White starts with 4 tables. Master covers ×2 through ×20.</div></div>
-    <div class="feat-card fc-b"><div class="feat-icon" style="background:rgba(25,118,210,.1)">⏱</div><div class="feat-title">Timed Sessions</div><div class="feat-desc">Belt-wide countdown clock. Skip hard questions — they come back. 3 attempts per belt.</div></div>
-    <div class="feat-card fc-gr"><div class="feat-icon" style="background:rgba(0,178,72,.1)">📊</div><div class="feat-title">Up to ×20</div><div class="feat-desc">Every table from ×1 to ×20. Lower belts start easy. Master belt tests everything at speed.</div></div>
-    <div class="feat-card fc-p"><div class="feat-icon" style="background:rgba(123,31,162,.1)">🎓</div><div class="feat-title">Find a Tutor</div><div class="feat-desc">Search verified tutors by county and specialisation. They see your exact weak spots.</div></div>
+    <div class="feat-card fc-b"><div class="feat-icon" style="background:rgba(25,118,210,.1)">⏱</div><div class="feat-title">Beat the Clock</div><div class="feat-desc">Every session runs on a countdown, so you're locked in, not zoning out. Stuck on a question? Skip it — it'll circle back before time runs out.</div></div>
+    <div class="feat-card fc-gr"><div class="feat-icon" style="background:rgba(0,178,72,.1)">📚</div><div class="feat-title">All Core Subjects</div><div class="feat-desc">Math, Sciences, Languages, Tech and more, all in one place. Start where you're comfortable and climb toward mastery, one challenge at a time.</div></div>
+    <div class="feat-card fc-g"><div class="feat-icon" style="background:rgba(255,193,7,.12)">🔥</div><div class="feat-title">Streaks &amp; Levels</div><div class="feat-desc">Every correct answer builds momentum. Keep your streak alive, level up as you go, and watch your progress stack up day after day.</div></div>
+    <div class="feat-card fc-p"><div class="feat-icon" style="background:rgba(123,31,162,.1)">⚡</div><div class="feat-title">Instant Feedback</div><div class="feat-desc">No waiting for a grade. Know the moment you're right or wrong, learn from the miss, and move on sharper than before.</div></div>
   </div>
 </div>
 
@@ -441,17 +438,10 @@ a{text-decoration:none}
     <div class="faq-grid">
       <div class="faq-item">
         <div class="faq-question" onclick="toggleFaq(this)">
-          <span><i class="fas fa-belt"></i> How do I earn belts?</span>
+          <span><i class="fas fa-fire"></i> How does the game element work?</span>
           <i class="fas fa-chevron-down"></i>
         </div>
-        <div class="faq-answer">Complete all table levels within the time limit. Each belt has multiple tables to master. Pass all tables to unlock the next belt. You have 3 attempts per belt.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-question" onclick="toggleFaq(this)">
-          <span><i class="fas fa-chalkboard-user"></i> How do I find a tutor?</span>
-          <i class="fas fa-chevron-down"></i>
-        </div>
-        <div class="faq-answer">After logging in, go to "Learning Hub" → "Find a Tutor". Search by county or specialisation, send a request. Once accepted, you can chat and schedule video calls.</div>
+        <div class="faq-answer">Every session is a race against the clock. Answer correctly to build your streak and level up, skip questions that stump you and circle back later, and get instant feedback so you always know exactly where you stand.</div>
       </div>
       <div class="faq-item">
         <div class="faq-question" onclick="toggleFaq(this)">
@@ -472,11 +462,11 @@ a{text-decoration:none}
 </div>
 
 <div class="land-cta-banner">
-  <div class="lcb-title">Ready to Earn Your Belt?</div>
-  <div class="lcb-sub">Join thousands of students already competing</div>
+  <div class="lcb-title">Ready to Level Up?</div>
+  <div class="lcb-sub">Join thousands of students turning study time into their favourite part of the day</div>
   <a href="{% url 'dojo:register' %}" class="btn btn-navy" style="font-size:18px;padding:15px 36px">Create Free Account</a>
 </div>
-<div class="land-footer"><p>© <span id="currentYear"></span> TimesTable Dojo · Built for serious learners</p></div>
+<div class="land-footer"><p>© <span id="currentYear"></span> Revision Dojo · Built for serious learners</p></div>
 
 <!-- Image Preview Modal -->
 <div class="modal-overlay image-preview-modal" id="imagePreviewModal">
@@ -487,19 +477,6 @@ a{text-decoration:none}
 </div>
 
 <script>
-// Belt pips
-const BELTS = [
-  {color:'#d0d0d0'}, {color:'#f9a825'}, {color:'#1565c0'}, {color:'#c62828'},
-  {color:'#1a1a1a'}, {color:'#4e342e'}, {color:'#6a1b9a'}, {color:'#b8860b'}, {color:'#1a237e'}
-];
-const pips = document.getElementById('landBeltPips');
-BELTS.forEach(belt => {
-  const d = document.createElement('div');
-  d.className = 'lbp';
-  d.style.background = belt.color;
-  pips.appendChild(d);
-});
-
 // Set current year dynamically
 document.getElementById('currentYear').textContent = new Date().getFullYear();
 

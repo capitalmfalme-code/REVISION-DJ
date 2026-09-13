@@ -3,404 +3,2005 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,viewport-fit=cover">
-<title>{{ project.title }} — Developer Hub</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ project.title }} — Editor</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
 :root{
-  --sky:#eef6ff;--sky2:#d0e8fa;--sky3:#b8d8f5;
-  --white:#fff;--ink:#1a2638;--ink2:#3b4d63;--ink3:#7088a0;
-  --gold:#ffc107;--gold2:#ffd740;--gold-dk:#e6a800;
-  --navy:#1a3a6b;--navy2:#234d96;
-  --blue:#1976d2;--blue2:#42a5f5;
-  --green:#00b248;--green2:#33d17a;--green-dk:#008f3a;
-  --red:#e53935;--amber:#f57c00;--purple:#7b1fa2;
-  --r:10px;--r2:16px;--r3:24px;
-  --sh:0 2px 12px rgba(26,58,107,.10);
-  --sh2:0 4px 24px rgba(26,58,107,.16);
-  --sh3:0 8px 40px rgba(26,58,107,.20);
+  --navy:#1a3a6b;--navy2:#234d96;--gold:#ffc107;--gold2:#ffd740;
+  --sky:#eef6ff;--sky2:#d0e8fa;--ink:#1a2638;--ink3:#7088a0;
+  --line:#d9e7f5;--red:#e53935;--green:#00b248;
 }
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%}
-body{font-family:'Nunito',sans-serif;background:var(--sky);color:var(--ink);overflow:hidden}
-.editor-shell{display:flex;flex-direction:column;height:100vh}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Nunito',system-ui,sans-serif;overflow:hidden;background:#0d1f3d}
+#app{display:grid;grid-template-rows:52px 1fr 24px;height:100vh}
 
-.top-nav{background:var(--navy);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 4px 20px rgba(0,0,0,.15);flex-wrap:wrap}
-.tn-left{display:flex;align-items:center;gap:14px;min-width:0}
-.tn-back{font-size:13px;font-weight:700;color:rgba(255,255,255,.8);cursor:pointer;display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:var(--r);transition:all .2s;text-decoration:none;flex-shrink:0}
-.tn-back:hover{color:#fff;background:rgba(255,255,255,.1)}
-#titleInput{background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.18);color:#fff;font-family:'Fredoka One',cursive;font-size:15px;padding:8px 14px;border-radius:var(--r);min-width:160px;max-width:280px}
-#titleInput:focus{outline:none;border-color:var(--gold)}
-.tn-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
-.tn-btn{border:none;padding:9px 16px;border-radius:99px;font-family:'Fredoka One',cursive;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .2s;white-space:nowrap}
-.tn-btn-save{background:rgba(255,255,255,.15);color:#fff}
-.tn-btn-save:hover{background:rgba(255,255,255,.25)}
-.tn-btn-publish{background:var(--gold);color:var(--navy)}
-.tn-btn-publish:hover{background:var(--gold2);transform:translateY(-1px)}
-.tn-btn-publish.published{background:var(--green2);color:#024d20}
-.save-status{font-size:11px;color:rgba(255,255,255,.6);font-weight:600;white-space:nowrap}
+/* Top bar */
+.bar{
+  background:var(--navy);color:#fff;display:flex;align-items:center;
+  gap:8px;padding:0 12px;box-shadow:0 2px 12px rgba(0,0,0,.2);z-index:10;
+}
+.bar a{color:#fff;text-decoration:none}
+.brand{
+  display:flex;align-items:center;gap:10px;font-weight:800;font-size:14px;
+  padding:6px 10px;border-radius:8px;transition:background .15s;
+}
+.brand:hover{background:rgba(255,255,255,.1)}
+.brand i{color:var(--gold)}
+.title-input{
+  flex:1;background:transparent;border:none;color:#fff;font-family:inherit;
+  font-size:14px;font-weight:700;padding:8px 12px;border-radius:8px;
+  transition:background .15s;min-width:80px;
+}
+.title-input:hover{background:rgba(255,255,255,.06)}
+.title-input:focus{outline:none;background:rgba(255,255,255,.12)}
+.btn{
+  border:none;border-radius:8px;padding:8px 12px;font-family:inherit;
+  font-size:12px;font-weight:800;cursor:pointer;display:inline-flex;
+  align-items:center;gap:6px;transition:all .15s;white-space:nowrap;
+}
+.btn:hover{transform:translateY(-1px)}
+.btn-gold{background:var(--gold);color:var(--navy)}
+.btn-gold:hover{background:var(--gold2)}
+.btn-ghost{background:rgba(255,255,255,.12);color:#fff}
+.btn-ghost:hover{background:rgba(255,255,255,.22)}
+.btn-green{background:var(--green);color:#fff}
 
-.tabs-bar{background:#fff;border-bottom:1px solid var(--sky2);display:flex;align-items:center;padding:0 16px;gap:4px}
-.code-tab{padding:11px 18px;font-size:13px;font-weight:700;color:var(--ink3);cursor:pointer;border-bottom:3px solid transparent;display:flex;align-items:center;gap:7px;transition:all .15s}
-.code-tab i.fa-html5{color:#e34c26}
-.code-tab i.fa-css3-alt{color:#264de4}
-.code-tab i.fa-js{color:#f0db4f}
-.code-tab.active{color:var(--navy);border-bottom-color:var(--gold)}
-.code-tab:hover:not(.active){color:var(--navy2);background:var(--sky)}
-.view-toggle{display:none;margin-left:auto;gap:4px}
-.view-toggle button{background:var(--sky);border:1px solid var(--sky2);padding:7px 14px;border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;color:var(--ink2)}
-.view-toggle button.active{background:var(--navy);color:#fff;border-color:var(--navy)}
-
-.workspace{flex:1;display:flex;min-height:0}
-.editor-pane{flex:1;display:flex;flex-direction:column;min-width:0;border-right:1px solid var(--sky2)}
-.editor-container{flex:1;min-height:0;position:relative}
-.monaco-box{position:absolute;inset:0;display:none}
-.monaco-box.active{display:block}
-
-.assets-panel{background:#fff;border-top:1px solid var(--sky2);padding:10px 14px;max-height:130px;overflow-y:auto;flex-shrink:0}
-.assets-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.assets-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);display:flex;align-items:center;gap:6px}
-.upload-btn{background:var(--sky);border:1.5px dashed var(--sky3);color:var(--navy2);padding:6px 14px;border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
-.upload-btn:hover{background:var(--sky2)}
-.assets-row{display:flex;gap:10px;flex-wrap:wrap}
-.asset-chip{display:flex;align-items:center;gap:8px;background:var(--sky);border:1px solid var(--sky2);border-radius:var(--r);padding:5px 6px;font-size:11px}
-.asset-chip img{width:28px;height:28px;object-fit:cover;border-radius:5px;background:#fff}
-.asset-chip .asset-name{max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2);font-weight:600}
-.asset-chip button{background:none;border:none;cursor:pointer;color:var(--navy2);font-size:11px;padding:3px 6px;border-radius:6px}
-.asset-chip button:hover{background:var(--sky2)}
-.assets-empty{font-size:11px;color:var(--ink3);padding:6px 0}
-
-.preview-pane{flex:1;display:flex;flex-direction:column;min-width:0;background:#fff}
-.preview-bar{padding:9px 14px;border-bottom:1px solid var(--sky2);display:flex;align-items:center;justify-content:space-between}
-.preview-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);display:flex;align-items:center;gap:6px}
-.preview-refresh{background:var(--sky);border:1px solid var(--sky2);color:var(--navy2);padding:6px 12px;border-radius:99px;font-size:11px;font-weight:700;cursor:pointer}
-.preview-refresh:hover{background:var(--sky2)}
-#previewFrame{flex:1;border:none;width:100%;background:#fff}
-
-@media(max-width:860px){
-  #titleInput{max-width:120px}
-  .save-status{display:none}
-  .view-toggle{display:flex}
-  .preview-pane{display:none}
-  .preview-pane.mobile-active{display:flex;position:fixed;inset:54px 0 0 0;z-index:50}
-  .editor-pane.mobile-hidden{display:none}
+/* Main layout */
+.main{
+  display:grid;grid-template-columns:260px 1fr;
+  min-height:0;background:#1e1e1e;
 }
 
-.modal{position:fixed;inset:0;background:rgba(26,38,56,.6);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px}
+/* Sidebar */
+.side{
+  background:#f7fbff;border-right:1px solid var(--line);
+  overflow:auto;padding:8px;display:flex;flex-direction:column;
+}
+.side-head{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:6px 8px 10px;gap:6px;
+}
+.side-head strong{
+  font-size:11px;color:#5c6f83;letter-spacing:.6px;font-weight:800;
+  flex:1;
+}
+.side-head .mini{
+  background:transparent;border:none;color:#5c6f83;cursor:pointer;
+  font-size:13px;padding:5px 8px;border-radius:6px;transition:all .15s;
+}
+.side-head .mini:hover{background:var(--sky2);color:var(--navy)}
+.side-head .mini.primary{
+  background:var(--gold);color:var(--navy);font-weight:800;
+}
+.side-head .mini.primary:hover{background:var(--gold2)}
+
+/* Tree rows */
+.tree-row{
+  display:flex;align-items:center;gap:6px;padding:6px 8px;
+  border-radius:7px;font-size:13px;cursor:pointer;color:#33475b;
+  font-weight:600;position:relative;user-select:none;
+}
+.tree-row:hover{background:var(--sky2)}
+.tree-row.active{background:var(--gold);color:var(--navy);font-weight:800}
+.tree-row.asset{cursor:default}
+.tree-row.asset:hover{background:#fff3cd}
+.tree-row .caret{
+  width:12px;text-align:center;font-size:10px;color:#8ba0b4;flex-shrink:0;
+  transition:transform .15s;
+}
+.tree-row.folder .caret.open{transform:rotate(90deg)}
+.tree-row .ico{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:16px;font-size:14px;flex-shrink:0;
+}
+.tree-row .name{
+  flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.tree-row .entry-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--green);
+  flex-shrink:0;
+}
+.tree-row .row-actions{
+  display:none;gap:2px;flex-shrink:0;
+}
+.tree-row:hover .row-actions{display:flex}
+.tree-row .row-actions button{
+  background:transparent;border:none;color:var(--ink3);cursor:pointer;
+  font-size:10px;padding:2px 5px;border-radius:4px;
+}
+.tree-row .row-actions button:hover{background:var(--red);color:#fff}
+.tree-row .row-actions button.alt:hover{background:var(--navy);color:#fff}
+.tree-row.indent-1{padding-left:24px}
+.tree-row.indent-2{padding-left:40px}
+.tree-row.indent-3{padding-left:56px}
+.empty{
+  font-size:12px;color:#889;padding:12px 10px;line-height:1.6;
+}
+.empty code{background:var(--sky2);padding:1px 5px;border-radius:4px;font-size:11px}
+
+/* Editor */
+.editor-wrap{display:flex;flex-direction:column;min-height:0;background:#1e1e1e}
+.tabs{
+  display:flex;background:#252526;overflow-x:auto;border-bottom:1px solid #111;
+  scrollbar-width:thin;
+}
+.tabs::-webkit-scrollbar{height:4px}
+.tabs::-webkit-scrollbar-thumb{background:#444}
+.tab{
+  padding:9px 14px;color:#bbb;font-size:12px;cursor:pointer;
+  border-right:1px solid #333;display:flex;align-items:center;gap:8px;
+  white-space:nowrap;font-weight:600;transition:background .1s;
+}
+.tab:hover{background:#2d2d2d;color:#fff}
+.tab.active{background:#1e1e1e;color:#fff;border-bottom:2px solid var(--gold)}
+.tab .tab-icon{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:14px;font-size:13px;flex-shrink:0;
+}
+.tab .dirty-dot{
+  width:7px;height:7px;border-radius:50%;background:var(--gold);display:none;
+}
+.tab.dirty .dirty-dot{display:block}
+.tab .close{
+  opacity:.5;font-size:11px;padding:1px 4px;border-radius:3px;
+  transition:all .15s;
+}
+.tab .close:hover{opacity:1;background:#444;color:#ff9090}
+#editor{flex:1;min-height:0}
+
+/* Image viewer pane (shown instead of editor when previewing an asset) */
+#imageViewer{
+  flex:1;display:none;align-items:center;justify-content:center;
+  background:#1e1e1e;padding:20px;flex-direction:column;gap:16px;
+}
+#imageViewer.show{display:flex}
+#imageViewer img{
+  max-width:100%;max-height:calc(100% - 60px);object-fit:contain;
+  border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.5);
+}
+#imageViewer .info{
+  color:#aaa;font-size:12px;font-family:ui-monospace,monospace;
+  display:flex;align-items:center;gap:16px;
+}
+#imageViewer .info button{
+  background:var(--gold);color:var(--navy);border:none;
+  border-radius:6px;padding:6px 12px;font-size:11px;font-weight:800;
+  cursor:pointer;font-family:inherit;
+}
+
+/* Status bar */
+.status{
+  background:#0d1f3d;color:#9fb4cf;font-size:11px;display:flex;
+  align-items:center;padding:0 14px;gap:18px;
+  font-family:ui-monospace,Consolas,monospace;
+}
+.status .pill{
+  padding:2px 8px;background:rgba(255,255,255,.06);border-radius:99px;
+}
+.status .ok{color:#4caf50}
+.status .warn{color:var(--gold)}
+.status #statusIcon i{margin-right:4px}
+
+/* Modal */
+.modal{
+  position:fixed;inset:0;background:rgba(10,20,40,.6);
+  display:none;align-items:center;justify-content:center;z-index:9999;
+  backdrop-filter:blur(2px);
+}
 .modal.on{display:flex}
-.modal-content{background:#fff;border-radius:var(--r2);padding:24px;max-width:440px;width:100%;box-shadow:var(--sh3)}
-.modal-title{font-family:'Fredoka One',cursive;font-size:17px;color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:8px}
-.modal-title i{color:var(--green)}
-.modal-text{font-size:13px;color:var(--ink2);margin-bottom:16px}
-.link-row{display:flex;gap:8px;margin-bottom:16px}
-.link-row input{flex:1;padding:10px;border:1.5px solid var(--sky2);border-radius:var(--r);font-size:12px;color:var(--navy2);background:var(--sky)}
-.link-row button{background:var(--navy);color:#fff;border:none;padding:0 16px;border-radius:var(--r);font-size:12px;font-weight:700;cursor:pointer}
-.modal-actions{display:flex;gap:10px}
-.modal-actions button, .modal-actions a{flex:1;padding:11px;border-radius:var(--r);font-weight:700;font-size:13px;cursor:pointer;border:none;text-align:center;text-decoration:none;display:block}
-.modal-cancel{background:var(--sky);color:var(--ink2)}
-.modal-confirm{background:var(--gold);color:var(--navy)}
+.modal-box{
+  background:#fff;border-radius:16px;padding:24px;
+  width:92%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.35);
+  max-height:90vh;display:flex;flex-direction:column;
+}
+.modal-box h3{
+  font-family:'Fredoka One',cursive;color:var(--navy);
+  margin-bottom:6px;font-size:18px;display:flex;align-items:center;gap:8px;
+}
+.modal-box h3 i{color:var(--gold)}
+.modal-box > p{font-size:12px;color:var(--ink3);margin-bottom:16px;line-height:1.5}
+.modal-box input[type=text]{
+  width:100%;padding:12px 14px;border:1.5px solid var(--sky2);
+  border-radius:10px;font-size:14px;font-family:inherit;
+}
+.modal-box input[type=text]:focus{outline:none;border-color:var(--gold)}
+.modal-actions{display:flex;gap:8px;margin-top:18px;justify-content:flex-end}
+.modal-actions .btn{padding:10px 18px}
 
-#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:2000;background:var(--navy);color:#fff;padding:8px 20px;border-radius:99px;font-family:'Fredoka One',cursive;font-size:12px;opacity:0;transition:opacity .25s;box-shadow:var(--sh2);white-space:nowrap}
+/* Preview modal */
+.preview-modal .modal-box{
+  width:96vw;max-width:1400px;height:90vh;max-height:90vh;padding:0;
+  overflow:hidden;
+}
+.preview-modal .preview-head{
+  display:flex;align-items:center;gap:10px;padding:12px 16px;
+  background:#eaf3fb;border-bottom:1px solid var(--line);
+}
+.preview-modal .preview-head .label{
+  flex:1;font-size:12px;font-weight:800;color:#5c6f83;
+  font-family:ui-monospace,monospace;
+}
+.preview-modal iframe{
+  flex:1;width:100%;border:none;background:#fff;
+}
+
+/* Extensions tabs */
+.ext-tabs{
+  display:flex;gap:4px;border-bottom:1px solid var(--line);
+  margin-bottom:14px;overflow-x:auto;
+}
+.ext-tab{
+  padding:8px 12px;font-size:12px;font-weight:800;color:var(--ink3);
+  cursor:pointer;border-radius:8px 8px 0 0;white-space:nowrap;
+  border-bottom:2px solid transparent;transition:all .15s;
+}
+.ext-tab:hover{background:var(--sky);color:var(--navy)}
+.ext-tab.active{color:var(--navy);border-bottom-color:var(--gold)}
+.ext-panel{display:none;overflow-y:auto;max-height:55vh;padding-right:4px}
+.ext-panel.active{display:block}
+.ext-item{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:12px;padding:12px 10px;border-bottom:1px solid #eef2f6;
+}
+.ext-item:last-child{border-bottom:none}
+.ext-item .info{flex:1}
+.ext-item .info strong{
+  font-size:13px;color:var(--ink);display:block;margin-bottom:2px;
+}
+.ext-item .info small{
+  font-size:11px;color:var(--ink3);line-height:1.4;
+}
+.switch{
+  position:relative;width:38px;height:22px;flex-shrink:0;
+  background:#cbd9e6;border-radius:99px;cursor:pointer;transition:background .15s;
+}
+.switch::after{
+  content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;
+  background:#fff;border-radius:50%;transition:transform .15s;
+  box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+.switch.on{background:var(--green)}
+.switch.on::after{transform:translateX(16px)}
+
+.icon-style-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+}
+.icon-style-opt{
+  background:var(--sky);border:2px solid transparent;border-radius:12px;
+  padding:14px 10px;cursor:pointer;text-align:center;
+  transition:all .15s;font-size:12px;font-weight:700;color:var(--ink);
+}
+.icon-style-opt:hover{background:var(--sky2);transform:translateY(-2px)}
+.icon-style-opt.active{border-color:var(--gold);background:#fff8e1}
+.icon-style-opt .preview{font-size:26px;display:block;margin-bottom:6px}
+.icon-style-opt .preview i{font-size:26px}
+
+/* Toast */
+#toast{
+  position:fixed;bottom:38px;left:50%;transform:translateX(-50%);
+  background:var(--navy);color:#fff;padding:10px 20px;border-radius:99px;
+  font-size:13px;font-weight:700;opacity:0;transition:opacity .2s;
+  z-index:10000;pointer-events:none;box-shadow:0 6px 24px rgba(0,0,0,.25);
+  white-space:nowrap;
+}
 #toast.show{opacity:1}
+
+/* Loading */
+#loading{
+  position:fixed;inset:0;background:#0d1f3d;color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:16px;z-index:99999;
+  font-size:14px;letter-spacing:1px;
+}
+#loading.hide{display:none}
+.spinner{
+  width:36px;height:36px;border:3px solid rgba(255,255,255,.2);
+  border-top-color:var(--gold);border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Upload */
+.img-preview{
+  max-width:100%;max-height:160px;border-radius:10px;
+  margin-top:12px;display:none;object-fit:contain;background:#f4f7fa;
+}
+.img-preview.show{display:block}
+.upload-zone{
+  border:2px dashed var(--sky2);border-radius:12px;padding:24px;
+  text-align:center;cursor:pointer;transition:all .15s;
+}
+.upload-zone:hover{border-color:var(--gold);background:#fff8e1}
+.upload-zone.dragover{border-color:var(--gold);background:#fff8e1}
+.upload-zone i{font-size:28px;color:var(--ink3);margin-bottom:8px;display:block}
+.upload-zone span{font-size:12px;color:var(--ink3)}
+.upload-file-name{
+  margin-top:10px;font-size:12px;color:var(--navy);font-weight:700;
+  display:none;
+}
+.upload-file-name.show{display:block}
+
+.folder-select{
+  width:100%;padding:12px 14px;border:1.5px solid var(--sky2);
+  border-radius:10px;font-size:14px;font-family:inherit;background:#fff;
+  color:var(--ink);cursor:pointer;
+}
+.folder-select:focus{outline:none;border-color:var(--gold)}
+.folder-hint{
+  font-size:11px;color:var(--ink3);margin-top:6px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.folder-hint button{
+  background:transparent;border:none;color:var(--navy);font-size:11px;
+  font-weight:800;cursor:pointer;text-decoration:underline;
+  font-family:inherit;
+}
+.new-folder-row{
+  display:none;margin-top:8px;gap:8px;align-items:center;
+}
+.new-folder-row.show{display:flex}
+.new-folder-row input{flex:1}
+
+@media(max-width:900px){
+  .main{grid-template-columns:200px 1fr}
+  .bar .btn span{display:none}
+}
 </style>
 </head>
-<body>
+<body data-project-id="{{ project.id }}">
 
-<div class="editor-shell">
-  <div class="top-nav">
-    <div class="tn-left">
-      <a href="{% url 'dojo:developer_projects' %}" class="tn-back"><i class="fas fa-arrow-left"></i></a>
-      <input type="text" id="titleInput" value="{{ project.title }}" maxlength="150">
-    </div>
-    <div class="tn-right">
-      <span class="save-status" id="saveStatus">Saved {{ project.updated_at|timesince }} ago</span>
-      <button class="tn-btn tn-btn-save" id="saveBtn"><i class="fas fa-save"></i> Save</button>
-      <button class="tn-btn tn-btn-publish {% if project.is_published %}published{% endif %}" id="publishBtn">
-        {% if project.is_published %}<i class="fas fa-check-circle"></i> Published{% else %}<i class="fas fa-rocket"></i> Publish{% endif %}
-      </button>
-    </div>
+<div id="loading"><div class="spinner"></div>Loading editor…</div>
+
+<div id="app">
+
+  <!-- TOP BAR -->
+  <div class="bar">
+    <a href="{% url 'dojo:developer_projects' %}" class="brand" title="Back to projects">
+      <i class="fas fa-arrow-left"></i>
+    </a>
+    <i class="fas fa-code" style="color:var(--gold)"></i>
+    <input type="text" class="title-input" id="projectTitle"
+           value="{{ project.title }}" maxlength="150" spellcheck="false">
+
+    <button class="btn btn-ghost" id="extBtn">
+      <i class="fas fa-puzzle-piece"></i> <span>Extensions</span>
+    </button>
+    <button class="btn btn-ghost" id="publishBtn">
+      <i class="fas fa-globe"></i> <span id="publishLabel">{% if project.is_published %}Unpublish{% else %}Publish{% endif %}</span>
+    </button>
+    <button class="btn btn-green" id="previewBtn">
+      <i class="fas fa-eye"></i> <span>Preview</span>
+    </button>
+    <button class="btn btn-ghost" id="openLiveBtn" style="display:none">
+      <i class="fas fa-external-link-alt"></i> <span>Live link</span>
+    </button>
+    <button class="btn btn-gold" id="saveBtn">
+      <i class="fas fa-save"></i> <span>Save</span>
+    </button>
   </div>
 
-  <div class="tabs-bar">
-    <div class="code-tab active" data-tab="html"><i class="fab fa-html5"></i> HTML</div>
-    <div class="code-tab" data-tab="css"><i class="fab fa-css3-alt"></i> CSS</div>
-    <div class="code-tab" data-tab="js"><i class="fab fa-js"></i> JavaScript</div>
-    <div class="view-toggle" id="viewToggle">
-      <button class="active" data-view="code"><i class="fas fa-code"></i> Code</button>
-      <button data-view="preview"><i class="fas fa-eye"></i> Preview</button>
-    </div>
+  <!-- MAIN -->
+  <div class="main">
+    <aside class="side">
+      <div class="side-head">
+        <strong>FILES</strong>
+        <button class="mini primary" id="newFileBtn" title="New file">
+          <i class="fas fa-file-circle-plus"></i> File
+        </button>
+        <button class="mini" id="newFolderBtn" title="New folder">
+          <i class="fas fa-folder-plus"></i>
+        </button>
+        <button class="mini" id="uploadBtn" title="Upload image">
+          <i class="fas fa-image"></i>
+        </button>
+      </div>
+      <div id="fileTree"></div>
+    </aside>
+
+    <section class="editor-wrap">
+      <div class="tabs" id="tabs"></div>
+      <div id="editor"></div>
+      <div id="imageViewer">
+        <img id="imageViewerImg" alt="">
+        <div class="info">
+          <span id="imageViewerPath"></span>
+          <button id="imageViewerInsert">Insert into HTML</button>
+        </div>
+      </div>
+    </section>
   </div>
 
-  <div class="workspace">
-    <div class="editor-pane" id="editorPane">
-      <div class="editor-container">
-        <div class="monaco-box active" id="boxHtml"></div>
-        <div class="monaco-box" id="boxCss"></div>
-        <div class="monaco-box" id="boxJs"></div>
-      </div>
-      <div class="assets-panel">
-        <div class="assets-header">
-          <div class="assets-title"><i class="fas fa-images"></i> Assets</div>
-          <label class="upload-btn">
-            <i class="fas fa-upload"></i> Upload Image
-            <input type="file" id="assetInput" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp,image/svg+xml" style="display:none">
-          </label>
-        </div>
-        <div class="assets-row" id="assetsRow">
-          {% for asset in project.assets.all %}
-          <div class="asset-chip" data-url="{{ asset.file.url }}">
-            <img src="{{ asset.file.url }}" alt="">
-            <span class="asset-name">{{ asset.original_filename }}</span>
-            <button onclick="insertAsset('{{ asset.file.url }}')" title="Insert into HTML"><i class="fas fa-plus"></i></button>
-            <button onclick="copyAssetUrl('{{ asset.file.url }}')" title="Copy URL"><i class="fas fa-copy"></i></button>
-          </div>
-          {% empty %}
-          <span class="assets-empty" id="assetsEmpty">No images uploaded yet.</span>
-          {% endfor %}
-        </div>
-      </div>
-    </div>
+  <!-- STATUS BAR -->
+  <div class="status">
+    <span id="statusPath">—</span>
+    <span class="pill" id="statusSaved">Ready</span>
+    <span style="margin-left:auto" id="statusIcon"><i class="fab fa-html5" style="color:#e34f26"></i> Vivid</span>
+  </div>
+</div>
 
-    <div class="preview-pane" id="previewPane">
-      <div class="preview-bar">
-        <div class="preview-label"><i class="fas fa-eye"></i> Live Preview</div>
-        <button class="preview-refresh" id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh</button>
-      </div>
-      <iframe id="previewFrame" sandbox="allow-scripts allow-forms allow-modals allow-popups"></iframe>
+<!-- NEW FILE MODAL -->
+<div class="modal" id="newFileModal">
+  <div class="modal-box">
+    <h3><i class="fas fa-file-circle-plus"></i> New file</h3>
+    <p>Type a name with an extension. Use slashes to create folders on the way — <code>about.html</code>, <code>styles/main.css</code>, <code>images/logo.svg</code></p>
+    <input type="text" id="newFileName" placeholder="about.html" autocomplete="off" spellcheck="false">
+    <div class="modal-actions">
+      <button class="btn btn-ghost" style="background:#eef2f6;color:#33475b" data-close>Cancel</button>
+      <button class="btn btn-gold" id="createFileBtn">Create file</button>
     </div>
   </div>
 </div>
 
-<div class="modal" id="publishModal">
-  <div class="modal-content">
-    <div class="modal-title"><i class="fas fa-check-circle"></i> Project Published!</div>
-    <div class="modal-text">Anyone with this link can now view your project:</div>
-    <div class="link-row">
-      <input type="text" id="publishLink" readonly>
-      <button onclick="copyPublishLink()"><i class="fas fa-copy"></i></button>
-    </div>
+<!-- NEW FOLDER MODAL -->
+<div class="modal" id="newFolderModal">
+  <div class="modal-box">
+    <h3><i class="fas fa-folder-plus"></i> New folder</h3>
+    <p>Folders keep your project tidy. You'll be able to save files and upload images into them.</p>
+    <input type="text" id="newFolderName" placeholder="images" autocomplete="off" spellcheck="false">
     <div class="modal-actions">
-      <button class="modal-cancel" onclick="closePublishModal()">Close</button>
-      <a class="modal-confirm" id="viewLiveLink" href="#" target="_blank">View Live</a>
+      <button class="btn btn-ghost" style="background:#eef2f6;color:#33475b" data-close>Cancel</button>
+      <button class="btn btn-gold" id="createFolderBtn">Create folder</button>
+    </div>
+  </div>
+</div>
+
+<!-- UPLOAD MODAL -->
+<div class="modal" id="uploadModal">
+  <div class="modal-box">
+    <h3><i class="fas fa-image"></i> Upload image</h3>
+    <p>PNG, JPG, GIF, WEBP, or SVG. Max 5 MB.</p>
+
+    <div class="upload-zone" id="uploadZone">
+      <i class="fas fa-cloud-arrow-up"></i>
+      <span>Click to choose an image, or drag & drop here</span>
+      <input type="file" id="uploadInput" accept="image/*" style="display:none">
+    </div>
+    <div class="upload-file-name" id="uploadFileName"></div>
+
+    <img id="uploadPreview" class="img-preview" alt="preview">
+
+    <div style="margin-top:16px">
+      <label style="font-size:11px;font-weight:800;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Save into folder</label>
+      <select class="folder-select" id="uploadFolderSelect"></select>
+      <div class="folder-hint">
+        <span>Pick where the image should live</span>
+        <button type="button" id="toggleNewFolderBtn">+ New folder</button>
+      </div>
+      <div class="new-folder-row" id="newFolderRow">
+        <input type="text" id="uploadFolderNew" placeholder="e.g. images/icons" autocomplete="off" spellcheck="false">
+        <button class="btn btn-gold" id="confirmNewFolderBtn" type="button" style="padding:10px 14px">Use it</button>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" style="background:#eef2f6;color:#33475b" data-close>Cancel</button>
+      <button class="btn btn-gold" id="uploadConfirmBtn" disabled>Upload</button>
+    </div>
+  </div>
+</div>
+
+<!-- PREVIEW MODAL -->
+<div class="modal preview-modal" id="previewModal">
+  <div class="modal-box">
+    <div class="preview-head">
+      <strong style="font-size:13px;color:var(--navy)"><i class="fas fa-eye" style="color:var(--gold)"></i> Live Preview</strong>
+      <span class="label" id="previewLabel">index.html</span>
+      <button class="btn btn-ghost" style="background:#cbd9e6;color:#33475b" id="refreshPreview">
+        <i class="fas fa-sync"></i> Refresh
+      </button>
+      <button class="btn btn-gold" id="openPreviewTab">
+        <i class="fas fa-external-link-alt"></i> Open in tab
+      </button>
+      <button class="btn btn-ghost" style="background:#cbd9e6;color:#33475b" data-close>
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <iframe id="previewFrame" sandbox="allow-scripts allow-modals allow-forms allow-popups allow-same-origin"></iframe>
+  </div>
+</div>
+
+<!-- EXTENSIONS MODAL -->
+<div class="modal" id="extModal">
+  <div class="modal-box">
+    <h3><i class="fas fa-puzzle-piece"></i> Extensions</h3>
+    <p>Toggle features to help you code faster.</p>
+
+    <div class="ext-tabs">
+      <div class="ext-tab active" data-tab="editing">Editing</div>
+      <div class="ext-tab" data-tab="appearance">Appearance</div>
+      <div class="ext-tab" data-tab="icons">File Icons</div>
+    </div>
+
+    <div class="ext-panel active" id="panel-editing">
+      <div class="ext-item">
+        <div class="info"><strong>Emmet</strong><small>Type <code>div&gt;p*3</code> then Tab</small></div>
+        <div class="switch on" data-ext="emmet"></div>
+      </div>
+      <div class="ext-item">
+        <div class="info"><strong>Autocomplete / IntelliSense</strong><small>Context-aware suggestions — always on</small></div>
+        <div class="switch on" style="opacity:.55;cursor:default;pointer-events:none" title="Always on"></div>
+      </div>
+      <div class="ext-item">
+        <div class="info"><strong>Auto-close tags & quotes</strong><small>Type &lt;div&gt; → get &lt;/div&gt;</small></div>
+        <div class="switch on" data-ext="autoclose"></div>
+      </div>
+      <div class="ext-item">
+        <div class="info"><strong>Bracket pair colorization</strong><small>Matching brackets share a colour</small></div>
+        <div class="switch on" data-ext="brackets"></div>
+      </div>
+      <div class="ext-item">
+        <div class="info"><strong>Highlight matching tag</strong><small>See the pair light up</small></div>
+        <div class="switch on" data-ext="matchtag"></div>
+      </div>
+      <div class="ext-item">
+        <div class="info"><strong>Autosave (1.2 s)</strong><small>Save while you type</small></div>
+        <div class="switch on" data-ext="autosave"></div>
+      </div>
+      <div class="ext-item">
+        <div class="info"><strong>Format on save</strong><small>Auto-indent on Ctrl+S</small></div>
+        <div class="switch" data-ext="format"></div>
+      </div>
+      <div class="ext-item">
+        <div class="info"><strong>Linked editing</strong><small>Rename a tag — the closing one updates</small></div>
+        <div class="switch on" data-ext="linkediting"></div>
+      </div>
+    </div>
+
+    <div class="ext-panel" id="panel-appearance">
+      <div class="ext-item">
+        <div class="info"><strong>Word wrap</strong><small>Long lines wrap</small></div>
+        <div class="switch on" data-ext="wrap"></div>
+      </div>
+      <div class="ext-item">
+        <div class="info"><strong>Minimap</strong><small>Tiny code overview</small></div>
+        <div class="switch" data-ext="minimap"></div>
+      </div>
+      <div class="ext-item">
+        <div class="info"><strong>Sticky scroll</strong><small>Pin current tag at top</small></div>
+        <div class="switch" data-ext="sticky"></div>
+      </div>
+      <div class="ext-item">
+        <div class="info"><strong>Font size</strong><small>Current: <span id="fontSizeLabel">13</span>px</small></div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost" style="background:#eef2f6;color:#33475b;padding:6px 10px" id="fontMinus">–</button>
+          <button class="btn btn-ghost" style="background:#eef2f6;color:#33475b;padding:6px 10px" id="fontPlus">+</button>
+        </div>
+      </div>
+      <div class="ext-item">
+        <div class="info"><strong>Editor theme</strong><small>Light or dark</small></div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost" style="background:#eef2f6;color:#33475b;padding:6px 10px" data-theme="vs-dark">Dark</button>
+          <button class="btn btn-ghost" style="background:#eef2f6;color:#33475b;padding:6px 10px" data-theme="vs">Light</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ext-panel" id="panel-icons">
+      <p style="font-size:12px;color:var(--ink3);margin-bottom:12px">Choose how file types appear in the sidebar.</p>
+      <div class="icon-style-grid">
+        <div class="icon-style-opt" data-style="vivid">
+          <span class="preview"><i class="fab fa-html5" style="color:#e34f26"></i></span>
+          Vivid
+        </div>
+        <div class="icon-style-opt" data-style="minimal">
+          <span class="preview"><i class="fas fa-file-code" style="color:#5a9bd5"></i></span>
+          Blue
+        </div>
+        <div class="icon-style-opt" data-style="mono">
+          <span class="preview"><i class="fas fa-file" style="color:#33475b"></i></span>
+          Mono
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-gold" data-close>Done</button>
     </div>
   </div>
 </div>
 
 <div id="toast"></div>
 
-<script src="{% static 'dojo/js/csrf.js' %}"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+
 <script>
-(function(){
+(function () {
   'use strict';
 
-  const PROJECT_ID = {{ project.id }};
-  const initialHtml = "{{ project.html_code|escapejs }}";
-  const initialCss = "{{ project.css_code|escapejs }}";
-  const initialJs = "{{ project.js_code|escapejs }}";
-  let isPublished = {% if project.is_published %}true{% else %}false{% endif %};
-  let showcaseUrl = {% if project.showcase_url %}"{{ project.showcase_url }}"{% else %}null{% endif %};
+  const PROJECT_ID = document.body.dataset.projectId;
+  const CSRF = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || '';
 
-  async function api(method, path, body, isFormData=false){
-    let opts = { method, credentials: 'include' };
-    if(!isFormData){
-      opts.headers = { 'Content-Type': 'application/json' };
-      if(body) opts.body = JSON.stringify(body);
-    } else {
-      opts.body = body;
-    }
-    try{
-      let r = await fetch(path, opts);
-      return await r.json();
-    } catch(e){
-      console.error('API error:', e);
-      return { error: 'Network error' };
-    }
+  const URLS = {
+    listFiles:    `/developer/project/${PROJECT_ID}/files/`,
+    listAssets:   `/developer/project/${PROJECT_ID}/assets/`,
+    createFile:   `/developer/project/${PROJECT_ID}/files/new/`,
+    createFolder: `/developer/project/${PROJECT_ID}/folders/new/`,
+    saveFile:     (id) => `/developer/file/${id}/save/`,
+    deleteFile:   (id) => `/developer/file/${id}/delete/`,
+    renameFile:   (id) => `/developer/file/${id}/rename/`,
+    setEntry:     (id) => `/developer/file/${id}/set-entry/`,
+    uploadAsset:  `/developer/project/${PROJECT_ID}/upload/`,
+    deleteAsset:  (id) => `/developer/asset/${id}/delete/`,
+    saveProject:  `/developer/project/${PROJECT_ID}/save/`,
+    publish:      `/developer/project/${PROJECT_ID}/publish/`,
+  };
+
+  const PUBLISHED_URL = "{{ project.showcase_url|default:'' }}";
+
+  const ICON_STYLES = {
+    vivid: {
+      html:{cls:'fab fa-html5',color:'#e34f26'},
+      htm:{cls:'fab fa-html5',color:'#e34f26'},
+      css:{cls:'fab fa-css3-alt',color:'#2965f1'},
+      js:{cls:'fab fa-js',color:'#f7df1e'},
+      json:{cls:'fas fa-cog',color:'#cbcb41'},
+      md:{cls:'fab fa-markdown',color:'#8ab4f8'},
+      svg:{cls:'fas fa-bezier-curve',color:'#ffb13b'},
+      png:{cls:'fas fa-image',color:'#a074c4'},
+      jpg:{cls:'fas fa-image',color:'#a074c4'},
+      jpeg:{cls:'fas fa-image',color:'#a074c4'},
+      gif:{cls:'fas fa-image',color:'#a074c4'},
+      webp:{cls:'fas fa-image',color:'#a074c4'},
+      txt:{cls:'fas fa-file-lines',color:'#a8b3c5'},
+      default:{cls:'fas fa-file-code',color:'#7b8fa3'},
+    },
+    minimal: {
+      html:{cls:'fas fa-file-code',color:'#5a9bd5'},
+      css:{cls:'fas fa-file-code',color:'#5a9bd5'},
+      js:{cls:'fas fa-file-code',color:'#5a9bd5'},
+      json:{cls:'fas fa-file-code',color:'#5a9bd5'},
+      md:{cls:'fas fa-file-lines',color:'#5a9bd5'},
+      svg:{cls:'fas fa-file-image',color:'#5a9bd5'},
+      default:{cls:'fas fa-file',color:'#7b8fa3'},
+    },
+    mono: {
+      html:{cls:'fas fa-code',color:'#33475b'},
+      css:{cls:'fas fa-palette',color:'#33475b'},
+      js:{cls:'fas fa-bolt',color:'#33475b'},
+      json:{cls:'fas fa-cog',color:'#33475b'},
+      md:{cls:'fas fa-file-lines',color:'#33475b'},
+      svg:{cls:'fas fa-bezier-curve',color:'#33475b'},
+      default:{cls:'fas fa-file',color:'#33475b'},
+    },
+  };
+  const STYLE_LABELS = {
+    vivid:{label:'Vivid', preview:'fab fa-html5', previewColor:'#e34f26'},
+    minimal:{label:'Blue', preview:'fas fa-file-code', previewColor:'#5a9bd5'},
+    mono:{label:'Mono', preview:'fas fa-file', previewColor:'#33475b'},
+  };
+
+  // ══════════════════════════════════════════════════════════════
+  // STATE — files and assets are SEPARATE collections now.
+  // ══════════════════════════════════════════════════════════════
+  const files = new Map();    // DevFile records — editable code files
+  const assets = new Map();   // DevAsset records — uploaded images
+  const folders = new Set();
+  const openFolders = new Set();
+
+  let openTabs = [];          // file ids (assets never go here)
+  let activeId = null;        // active FILE id (assets use viewer instead)
+  let activeAssetId = null;   // active ASSET id when viewing image
+  let monacoEditor = null;
+  let monacoReady = null;
+  let autosaveTimer = null;
+  let projectIsPublished = {{ project.is_published|yesno:"true,false" }};
+
+  const EXT_DEFAULTS = {
+    emmet: true, autoclose: true, brackets: true,
+    matchtag: true, autosave: true, format: false, linkediting: true,
+    wrap: true, minimap: false, sticky: false,
+  };
+  let exts = { ...EXT_DEFAULTS };
+  try {
+    const saved = JSON.parse(localStorage.getItem('devExts') || '{}');
+    Object.keys(EXT_DEFAULTS).forEach(k => { if (k in saved) exts[k] = !!saved[k]; });
+  } catch (_) {}
+  function saveExts() { localStorage.setItem('devExts', JSON.stringify(exts)); }
+
+  let fontSize = parseInt(localStorage.getItem('devFontSize') || '13', 10);
+  let editorTheme = localStorage.getItem('devTheme') || 'vs-dark';
+  let iconStyle = localStorage.getItem('iconStyle') || 'vivid';
+  if (!ICON_STYLES[iconStyle]) iconStyle = 'vivid';
+
+  const $ = (s) => document.querySelector(s);
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
   }
-  let POST = (p, b) => api('POST', p, b);
-  let POST_FORM = (p, b) => api('POST', p, b, true);
 
-  function toast(msg, bg='var(--navy)'){
-    let t = document.getElementById('toast');
+  function toast(msg, bg = '#1a3a6b') {
+    const t = $('#toast');
     t.textContent = msg;
     t.style.background = bg;
     t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
+    clearTimeout(t._h);
+    t._h = setTimeout(() => t.classList.remove('show'), 2400);
   }
 
-  let htmlEditor, cssEditor, jsEditor;
-  let previewTimer = null;
-
-  function updatePreview(){
-    clearTimeout(previewTimer);
-    previewTimer = setTimeout(() => {
-      const html = htmlEditor.getValue();
-      const css = cssEditor.getValue();
-      const js = jsEditor.getValue();
-      const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${css}</style></head><body>${html}<script>${js}<\/script></body></html>`;
-      const frame = document.getElementById('previewFrame');
-      frame.srcdoc = doc;
-    }, 350);
+  async function api(method, url, body) {
+    const opts = { method, credentials:'include', headers:{ 'X-CSRFToken': CSRF } };
+    if (body !== undefined) {
+      opts.headers['Content-Type'] = 'application/json';
+      opts.body = JSON.stringify(body);
+    }
+    const r = await fetch(url, opts);
+    let data = {};
+    try { data = await r.json(); } catch (_) {}
+    if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+    return data;
   }
 
-  require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
-  require(['vs/editor/editor.main'], function(){
-    htmlEditor = monaco.editor.create(document.getElementById('boxHtml'), {
-      value: initialHtml, language: 'html', theme: 'vs', fontSize: 13, minimap: { enabled: false }, automaticLayout: true, wordWrap: 'on'
+  function extOf(path) {
+    return path.includes('.') ? path.split('.').pop().toLowerCase() : '';
+  }
+  function basename(path) { return path.split('/').pop(); }
+  function dirname(path) {
+    const i = path.lastIndexOf('/');
+    return i >= 0 ? path.slice(0, i) : '';
+  }
+  function iconFor(path) {
+    const ext = extOf(path);
+    const set = ICON_STYLES[iconStyle] || ICON_STYLES.vivid;
+    return set[ext] || set.default;
+  }
+  function iconHTML(path) {
+    const i = iconFor(path);
+    return `<i class="${i.cls}" style="color:${i.color}"></i>`;
+  }
+  function folderIconHTML(open) {
+    return open
+      ? '<i class="fas fa-folder-open" style="color:#ffb13b"></i>'
+      : '<i class="fas fa-folder" style="color:#ffb13b"></i>';
+  }
+
+  // ── Boot ──────────────────────────────────────────────────────
+  async function boot() {
+    try {
+      // Load files and assets in parallel
+      const [filesData, assetsData] = await Promise.all([
+        api('GET', URLS.listFiles).catch(() => ({ files: [] })),
+        api('GET', URLS.listAssets).catch(() => ({ assets: [] })),
+      ]);
+
+      (filesData.files || []).forEach(f => files.set(f.id, { ...f, dirty:false }));
+      (assetsData.assets || []).forEach(a => assets.set(a.id, a));
+
+      rebuildFolders();
+      renderTree();
+      updateOpenLiveBtn();
+      populateFolderSelect();
+
+      initMonaco().then(() => {
+        const entry = [...files.values()].find(f => f.is_entry)
+                   || [...files.values()].find(f => f.path.endsWith('.html'))
+                   || [...files.values()][0];
+        if (entry) openFile(entry.id);
+        else showEmptyState();
+        $('#loading').classList.add('hide');
+      });
+    } catch (e) {
+      $('#loading').innerHTML = `<div style="color:#e53935">Failed to load: ${escapeHtml(e.message)}</div>`;
+    }
+  }
+
+  function rebuildFolders() {
+    folders.clear();
+    // Folders implied by files
+    [...files.values()].forEach(f => {
+      const parts = f.path.split('/'); parts.pop();
+      let acc = '';
+      parts.forEach(p => { acc = acc ? acc + '/' + p : p; folders.add(acc); });
     });
-    cssEditor = monaco.editor.create(document.getElementById('boxCss'), {
-      value: initialCss, language: 'css', theme: 'vs', fontSize: 13, minimap: { enabled: false }, automaticLayout: true, wordWrap: 'on'
+    // Folders implied by assets
+    [...assets.values()].forEach(a => {
+      const p = a.path || a.original_filename || '';
+      if (!p.includes('/')) return;
+      const parts = p.split('/'); parts.pop();
+      let acc = '';
+      parts.forEach(part => { acc = acc ? acc + '/' + part : part; folders.add(acc); });
     });
-    jsEditor = monaco.editor.create(document.getElementById('boxJs'), {
-      value: initialJs, language: 'javascript', theme: 'vs', fontSize: 13, minimap: { enabled: false }, automaticLayout: true, wordWrap: 'on'
+    folders.forEach(p => openFolders.add(p));
+  }
+
+  function showEmptyState() {
+    if (!monacoEditor) return;
+    showEditorPane();
+    monacoEditor.updateOptions({ readOnly: true });
+    monacoEditor.setValue(
+`// Welcome to your blank project 👋
+//
+// You haven't created any files yet.
+// Click  + File  in the sidebar to make one. Try:
+//   index.html
+//   styles/main.css
+//   app.js
+//   images/logo.svg   ← creates the images folder automatically
+//
+// Use the 🖼  Upload button to add images from your device.
+`);
+  }
+
+  // ── Always-on suggestion source ─────────────────────────────────
+  // Monaco's built-in HTML/CSS/JS language services are context-strict
+  // (e.g. attribute suggestions only appear inside a tag's brackets).
+  // That's correct for professional editors but leaves students stuck
+  // with "No suggestions" the moment they're not in exactly the right
+  // spot. This registers a permissive provider that always has
+  // something relevant to offer, regardless of cursor position.
+  function registerAlwaysOnCompletions() {
+    const rangeAt = (model, position) => {
+      const word = model.getWordUntilPosition(position);
+      return {
+        startLineNumber: position.lineNumber,
+        endLineNumber: position.lineNumber,
+        startColumn: word.startColumn,
+        endColumn: word.endColumn,
+      };
+    };
+
+    const HTML_TAGS = ['html','head','body','title','meta','link','script','style',
+      'div','span','p','a','img','ul','ol','li','table','tr','td','th','thead','tbody',
+      'form','input','button','label','select','option','textarea',
+      'h1','h2','h3','h4','h5','h6','header','footer','nav','section','article','aside','main',
+      'iframe','video','audio','source','canvas','svg','br','hr','strong','em','b','i','u','small','code','pre','blockquote'];
+
+    const HTML_ATTRS = ['src','alt','href','class','id','style','title','target','type','value',
+      'placeholder','name','for','rel','action','method','width','height','disabled','checked',
+      'required','maxlength','min','max','step','pattern','autofocus','autocomplete','tabindex',
+      'role','aria-label','onclick','onchange','onsubmit'];
+
+    monaco.languages.registerCompletionItemProvider('html', {
+      triggerCharacters: ['<', ' ', '"', '=', '/', "'"],
+      provideCompletionItems(model, position) {
+        const lineContent = model.getLineContent(position.lineNumber);
+        const beforeCursor = lineContent.slice(0, position.column - 1);
+
+        // ── Are we typing inside src="..." or href="..."? ──
+        // If so, this is a file path, not markup — suggest real
+        // project files/images instead of tags/attributes.
+        const attrMatch = beforeCursor.match(/(src|href)\s*=\s*["']([^"']*)$/i);
+        if (attrMatch) {
+          const attrName = attrMatch[1].toLowerCase();
+          const typedPath = attrMatch[2];
+          const range = {
+            startLineNumber: position.lineNumber,
+            endLineNumber: position.lineNumber,
+            startColumn: position.column - typedPath.length,
+            endColumn: position.column,
+          };
+
+          const currentFile = files.get(activeId);
+          const baseDir = currentFile ? dirname(currentFile.path) : '';
+          const relFromBase = (targetPath) => {
+            if (baseDir && targetPath.startsWith(baseDir + '/')) {
+              return targetPath.slice(baseDir.length + 1);
+            }
+            return targetPath;
+          };
+
+          const suggestions = [];
+
+          if (attrName === 'src') {
+            assets.forEach(a => {
+              const full = a.path || a.original_filename || '';
+              if (!full) return;
+              const rel = relFromBase(full);
+              suggestions.push({
+                label: rel,
+                kind: monaco.languages.CompletionItemKind.File,
+                insertText: rel,
+                detail: 'Image · ' + full,
+                sortText: '0' + rel,
+                range,
+              });
+            });
+            files.forEach(f => {
+              if (f.id === activeId || !/\.(js|mjs)$/i.test(f.path)) return;
+              const rel = relFromBase(f.path);
+              suggestions.push({
+                label: rel,
+                kind: monaco.languages.CompletionItemKind.File,
+                insertText: rel,
+                detail: 'Script · ' + f.path,
+                sortText: '1' + rel,
+                range,
+              });
+            });
+          } else {
+            files.forEach(f => {
+              if (f.id === activeId || !/\.(html?|css)$/i.test(f.path)) return;
+              const rel = relFromBase(f.path);
+              suggestions.push({
+                label: rel,
+                kind: monaco.languages.CompletionItemKind.File,
+                insertText: rel,
+                detail: (f.path.endsWith('.css') ? 'Stylesheet · ' : 'Page · ') + f.path,
+                sortText: '0' + rel,
+                range,
+              });
+            });
+          }
+
+          return { suggestions, incomplete: false };
+        }
+
+        // ── Not inside a path — normal tag/attribute suggestions ──
+        const r = rangeAt(model, position);
+        const suggestions = [
+          ...HTML_TAGS.map(tag => ({
+            label: tag, kind: monaco.languages.CompletionItemKind.Property,
+            insertText: tag, detail: 'HTML tag', range: r,
+          })),
+          ...HTML_ATTRS.map(attr => ({
+            label: attr, kind: monaco.languages.CompletionItemKind.Value,
+            insertText: `${attr}="$1"`,
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: 'HTML attribute', range: r,
+          })),
+        ];
+        return { suggestions };
+      },
     });
 
-    htmlEditor.onDidChangeModelContent(updatePreview);
-    cssEditor.onDidChangeModelContent(updatePreview);
-    jsEditor.onDidChangeModelContent(updatePreview);
+    const CSS_PROPS = ['color','background','background-color','margin','padding','border',
+      'border-radius','display','flex','flex-direction','justify-content','align-items',
+      'width','height','font-size','font-family','font-weight','text-align','position',
+      'top','left','right','bottom','z-index','opacity','transition','transform',
+      'box-shadow','cursor','overflow','grid-template-columns','gap'];
 
-    updatePreview();
-  });
-
-  // Tabs
-  const boxes = { html: 'boxHtml', css: 'boxCss', js: 'boxJs' };
-  document.querySelectorAll('.code-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      Object.values(boxes).forEach(id => document.getElementById(id).classList.remove('active'));
-      document.getElementById(boxes[tab.dataset.tab]).classList.add('active');
-      setTimeout(() => {
-        if(tab.dataset.tab === 'html' && htmlEditor) htmlEditor.layout();
-        if(tab.dataset.tab === 'css' && cssEditor) cssEditor.layout();
-        if(tab.dataset.tab === 'js' && jsEditor) jsEditor.layout();
-      }, 0);
+    monaco.languages.registerCompletionItemProvider('css', {
+      triggerCharacters: [':', ' '],
+      provideCompletionItems(model, position) {
+        const r = rangeAt(model, position);
+        return {
+          suggestions: CSS_PROPS.map(p => ({
+            label: p, kind: monaco.languages.CompletionItemKind.Property,
+            insertText: `${p}: `, detail: 'CSS property', range: r,
+          })),
+        };
+      },
     });
-  });
 
-  // Mobile code/preview toggle
-  document.querySelectorAll('.view-toggle button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.view-toggle button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const editorPane = document.getElementById('editorPane');
-      const previewPane = document.getElementById('previewPane');
-      if(btn.dataset.view === 'preview'){
-        editorPane.classList.add('mobile-hidden');
-        previewPane.classList.add('mobile-active');
-      } else {
-        editorPane.classList.remove('mobile-hidden');
-        previewPane.classList.remove('mobile-active');
+    const JS_SNIPPETS = ['function','const','let','var','if','else','for','while','return',
+      'console.log','document.querySelector','document.getElementById','addEventListener',
+      'class','new','this','import','export','async','await','try','catch',
+      'JSON.stringify','JSON.parse','setTimeout','setInterval'];
+
+    monaco.languages.registerCompletionItemProvider('javascript', {
+      triggerCharacters: ['.'],
+      provideCompletionItems(model, position) {
+        const r = rangeAt(model, position);
+        return {
+          suggestions: JS_SNIPPETS.map(k => ({
+            label: k, kind: monaco.languages.CompletionItemKind.Keyword,
+            insertText: k, detail: 'JavaScript', range: r,
+          })),
+        };
+      },
+    });
+  }
+
+  // ── Monaco ────────────────────────────────────────────────────
+  function initMonaco() {
+    if (monacoReady) return monacoReady;
+    monacoReady = new Promise((resolve) => {
+      require.config({ paths: { vs:'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
+      require(['vs/editor/editor.main'], () => {
+        // ── Real IntelliSense for HTML / CSS / JS — registered once, always on ──
+        try {
+          monaco.languages.html.htmlDefaults.setOptions({
+            suggest: { html5: true },
+            data: { useDefaultDataProvider: true },
+          });
+          monaco.languages.css.cssDefaults.setOptions({
+            validate: true,
+            completion: { triggerPropertyValueCompletion: true },
+          });
+          monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+            target: monaco.languages.typescript.ScriptTarget.ES2020,
+            allowNonTsExtensions: true,
+            allowJs: true,
+            checkJs: false,
+          });
+          monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
+          monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+            noSemanticValidation: false,
+            noSyntaxValidation: false,
+          });
+        } catch (_) { /* language service not available on this CDN build — suggestions still work via quickSuggestions/wordBasedSuggestions below */ }
+
+        try {
+          registerAlwaysOnCompletions();
+        } catch (_) { /* if this ever throws, the editor still loads — just without the fallback list */ }
+
+        monacoEditor = monaco.editor.create($('#editor'), {
+          value: '',
+          language: 'html',
+          theme: editorTheme,
+          automaticLayout: true,
+          fontSize: fontSize,
+          minimap: { enabled: exts.minimap },
+          tabSize: 2,
+          scrollBeyondLastLine: false,
+          wordWrap: exts.wrap ? 'on' : 'off',
+
+          // ── Autocomplete / IntelliSense — always on, not tied to a toggle ──
+          suggestOnTriggerCharacters: true,
+          quickSuggestions: { other: true, comments: false, strings: true },
+          quickSuggestionsDelay: 10,
+          snippetSuggestions: 'top',
+          parameterHints: { enabled: true, cycle: true },
+          tabCompletion: 'on',
+          acceptSuggestionOnEnter: 'on',
+          acceptSuggestionOnCommitCharacter: true,
+          wordBasedSuggestions: 'currentDocument',
+          suggest: {
+            showWords: true,
+            showSnippets: true,
+            showKeywords: true,
+            showFunctions: true,
+            showClasses: true,
+            showProperties: true,
+            showValues: true,
+            preview: true,
+            insertMode: 'insert',
+          },
+
+          autoClosingBrackets: exts.autoclose ? 'always' : 'never',
+          autoClosingQuotes: exts.autoclose ? 'always' : 'never',
+          autoClosingTags: exts.autoclose,
+          autoIndent: 'full',
+          formatOnPaste: exts.format,
+          formatOnType: exts.format,
+          bracketPairColorization: { enabled: exts.brackets },
+          matchBrackets: exts.matchtag ? 'always' : 'never',
+          linkedEditing: exts.linkediting,
+          stickyScroll: { enabled: exts.sticky },
+          scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 },
+        });
+
+        // Belt-and-braces: force suggestions open as soon as the student starts typing
+        // an identifier, even on the very first keystroke of a fresh line.
+        monacoEditor.onDidType(() => {
+          const pos = monacoEditor.getPosition();
+          const model = monacoEditor.getModel();
+          if (!pos || !model) return;
+          const lineUpToCursor = model.getLineContent(pos.lineNumber).slice(0, pos.column - 1);
+          if (/[A-Za-z0-9_.\-<>"'/#:]$/.test(lineUpToCursor)) {
+            monacoEditor.trigger('always-on-suggest', 'editor.action.triggerSuggest', {});
+          }
+        });
+
+        monacoEditor.onDidChangeModelContent(() => {
+          const f = files.get(activeId);
+          if (!f) return;
+          f.content = monacoEditor.getValue();
+          if (!f.dirty) {
+            f.dirty = true;
+            renderTabs();
+            $('#statusSaved').textContent = 'Unsaved';
+            $('#statusSaved').classList.remove('ok');
+            $('#statusSaved').classList.add('warn');
+          }
+          if (exts.autosave) scheduleAutosave();
+        });
+
+        resolve();
+      });
+    });
+    return monacoReady;
+  }
+
+  function applyExtOptions() {
+    if (!monacoEditor) return;
+    monacoEditor.updateOptions({
+      minimap: { enabled: exts.minimap },
+      wordWrap: exts.wrap ? 'on' : 'off',
+
+      // Autocomplete / IntelliSense — always on, never controlled by a toggle
+      suggestOnTriggerCharacters: true,
+      quickSuggestions: { other: true, comments: false, strings: true },
+      snippetSuggestions: 'top',
+      parameterHints: { enabled: true, cycle: true },
+      tabCompletion: 'on',
+      acceptSuggestionOnEnter: 'on',
+      wordBasedSuggestions: 'currentDocument',
+
+      autoClosingBrackets: exts.autoclose ? 'always' : 'never',
+      autoClosingQuotes: exts.autoclose ? 'always' : 'never',
+      autoClosingTags: exts.autoclose,
+      formatOnPaste: exts.format,
+      formatOnType: exts.format,
+      bracketPairColorization: { enabled: exts.brackets },
+      matchBrackets: exts.matchtag ? 'always' : 'never',
+      linkedEditing: exts.linkediting,
+      stickyScroll: { enabled: exts.sticky },
+      fontSize: fontSize,
+    });
+    monaco.editor.setTheme(editorTheme);
+  }
+
+  function languageFor(path) {
+    return ({
+      html:'html', htm:'html', css:'css', js:'javascript', mjs:'javascript',
+      json:'json', md:'markdown', svg:'xml', txt:'plaintext',
+    })[extOf(path)] || 'plaintext';
+  }
+
+  // ── Pane switching (editor vs image viewer) ──────────────────
+  function showEditorPane() {
+    $('#imageViewer').classList.remove('show');
+    $('#editor').style.display = 'block';
+    activeAssetId = null;
+  }
+  function showImagePane(assetId) {
+    const a = assets.get(assetId);
+    if (!a) return;
+    activeAssetId = assetId;
+    $('#editor').style.display = 'none';
+    $('#imageViewer').classList.add('show');
+    $('#imageViewerImg').src = a.url;
+    $('#imageViewerPath').textContent = a.path || a.original_filename || '';
+    $('#statusPath').textContent = a.path || a.original_filename || '';
+    $('#statusSaved').textContent = 'Asset';
+    $('#statusSaved').classList.remove('ok', 'warn');
+  }
+
+  // ── File tree ─────────────────────────────────────────────────
+  function renderTree() {
+    const tree = $('#fileTree');
+    tree.innerHTML = '';
+
+    if (!files.size && !assets.size && !folders.size) {
+      tree.innerHTML = '<div class="empty">No files yet.<br>Click <b>+ File</b> above to make one.</div>';
+      return;
+    }
+
+    const root = { children:{}, files:[], assets:[] };
+
+    // Insert files
+    [...files.values()].forEach(f => {
+      const parts = f.path.split('/');
+      const name = parts.pop();
+      let node = root;
+      parts.forEach(p => {
+        if (!node.children[p]) node.children[p] = { children:{}, files:[], assets:[] };
+        node = node.children[p];
+      });
+      node.files.push({ ...f, name });
+    });
+
+    // Insert assets
+    [...assets.values()].forEach(a => {
+      const p = a.path || a.original_filename || 'image';
+      const parts = p.split('/');
+      const name = parts.pop();
+      let node = root;
+      parts.forEach(part => {
+        if (!node.children[part]) node.children[part] = { children:{}, files:[], assets:[] };
+        node = node.children[part];
+      });
+      node.assets.push({ ...a, name, fullPath: p });
+    });
+
+    // Insert empty folders
+    folders.forEach(p => {
+      const parts = p.split('/');
+      let node = root;
+      parts.forEach(part => {
+        if (!node.children[part]) node.children[part] = { children:{}, files:[], assets:[] };
+        node = node.children[part];
+      });
+    });
+
+    function renderNode(node, prefix, depth) {
+      Object.keys(node.children).sort().forEach(folderName => {
+        const full = prefix ? prefix + '/' + folderName : folderName;
+        const open = openFolders.has(full);
+        const row = document.createElement('div');
+        row.className = 'tree-row folder indent-' + Math.min(depth, 3);
+        row.innerHTML = `
+          <span class="caret ${open?'open':''}"><i class="fas fa-chevron-right"></i></span>
+          <span class="ico">${folderIconHTML(open)}</span>
+          <span class="name">${escapeHtml(folderName)}</span>
+          <span class="row-actions">
+            <button class="alt" title="Rename" data-rename-folder="${escapeHtml(full)}"><i class="fas fa-pen"></i></button>
+            <button title="Delete" data-delete-folder="${escapeHtml(full)}"><i class="fas fa-trash"></i></button>
+          </span>
+        `;
+        row.querySelector('.caret').addEventListener('click', (e) => {
+          e.stopPropagation();
+          open ? openFolders.delete(full) : openFolders.add(full);
+          renderTree();
+        });
+        row.addEventListener('click', () => {
+          open ? openFolders.delete(full) : openFolders.add(full);
+          renderTree();
+        });
+        row.querySelector('[data-rename-folder]').addEventListener('click', (e) => {
+          e.stopPropagation();
+          renameFolder(full);
+        });
+        row.querySelector('[data-delete-folder]').addEventListener('click', (e) => {
+          e.stopPropagation();
+          deleteFolder(full);
+        });
+        tree.appendChild(row);
+
+        if (open) renderNode(node.children[folderName], full, depth + 1);
+      });
+
+      // Files
+      node.files.sort((a, b) => {
+        if (a.is_entry && !b.is_entry) return -1;
+        if (b.is_entry && !a.is_entry) return 1;
+        return a.name.localeCompare(b.name);
+      }).forEach(f => {
+        const row = document.createElement('div');
+        row.className = 'tree-row indent-' + Math.min(depth, 3) + (f.id === activeId ? ' active' : '');
+        row.title = f.path + (f.is_entry ? ' (entry)' : '');
+        row.innerHTML = `
+          <span class="caret"></span>
+          <span class="ico">${iconHTML(f.path)}</span>
+          <span class="name">${escapeHtml(f.name)}</span>
+          ${f.is_entry ? '<span class="entry-dot" title="Entry file"></span>' : ''}
+          <span class="row-actions">
+            ${f.path.endsWith('.html') && !f.is_entry ? `<button class="alt" title="Set as entry" data-setentry="${f.id}"><i class="fas fa-home"></i></button>` : ''}
+            <button title="Delete" data-delete="${f.id}"><i class="fas fa-trash"></i></button>
+          </span>
+        `;
+        row.addEventListener('click', (e) => {
+          if (e.target.closest('.row-actions')) return;
+          openFile(f.id);
+        });
+        row.querySelectorAll('[data-delete]').forEach(b => {
+          b.addEventListener('click', (e) => { e.stopPropagation(); deleteFile(f.id); });
+        });
+        row.querySelectorAll('[data-setentry]').forEach(b => {
+          b.addEventListener('click', (e) => { e.stopPropagation(); setEntryFile(f.id); });
+        });
+        tree.appendChild(row);
+      });
+
+      // Assets (images)
+      node.assets.sort((a, b) => a.name.localeCompare(b.name)).forEach(a => {
+        const row = document.createElement('div');
+        row.className = 'tree-row asset indent-' + Math.min(depth, 3) + (a.id === activeAssetId ? ' active' : '');
+        row.title = a.fullPath + ' (image)';
+        row.innerHTML = `
+          <span class="caret"></span>
+          <span class="ico">${iconHTML(a.fullPath)}</span>
+          <span class="name">${escapeHtml(a.name)}</span>
+          <span class="row-actions">
+            <button class="alt" title="Insert into HTML" data-insert-asset="${a.id}"><i class="fas fa-plus"></i></button>
+            <button title="Delete" data-delete-asset="${a.id}"><i class="fas fa-trash"></i></button>
+          </span>
+        `;
+        row.addEventListener('click', (e) => {
+          if (e.target.closest('.row-actions')) return;
+          showImagePane(a.id);
+          renderTabs();
+          renderTree();
+        });
+        row.querySelectorAll('[data-delete-asset]').forEach(b => {
+          b.addEventListener('click', (e) => { e.stopPropagation(); deleteAsset(a.id); });
+        });
+        row.querySelectorAll('[data-insert-asset]').forEach(b => {
+          b.addEventListener('click', (e) => { e.stopPropagation(); insertAssetIntoHTML(a); });
+        });
+        tree.appendChild(row);
+      });
+    }
+
+    renderNode(root, '', 0);
+  }
+
+  // ── Tabs (only for code files) ────────────────────────────────
+  function renderTabs() {
+    const bar = $('#tabs');
+    bar.innerHTML = '';
+    openTabs.forEach(id => {
+      const f = files.get(id);
+      if (!f) return;
+      const tab = document.createElement('div');
+      tab.className = 'tab' + (id === activeId && !activeAssetId ? ' active' : '') + (f.dirty ? ' dirty' : '');
+      tab.innerHTML = `
+        <span class="tab-icon">${iconHTML(f.path)}</span>
+        <span>${escapeHtml(basename(f.path))}</span>
+        <span class="dirty-dot"></span>
+        <span class="close" title="Close">✕</span>
+      `;
+      tab.title = f.path;
+      tab.addEventListener('click', (e) => {
+        if (e.target.classList.contains('close')) closeTab(id);
+        else openFile(id);
+      });
+      bar.appendChild(tab);
+    });
+  }
+
+  function closeTab(id) {
+    const i = openTabs.indexOf(id);
+    if (i >= 0) openTabs.splice(i, 1);
+    if (activeId === id) {
+      activeId = openTabs[i] || openTabs[i - 1] || null;
+      if (activeId) showInEditor(activeId);
+      else if (!activeAssetId) {
+        showEditorPane();
+        monacoEditor.setValue('');
+        monacoEditor.updateOptions({ readOnly: true });
+        showEmptyState();
       }
-    });
-  });
+    }
+    renderTabs();
+    renderTree();
+  }
 
-  document.getElementById('refreshBtn').addEventListener('click', updatePreview);
+  async function openFile(id) {
+    if (!id) return;
+    if (!openTabs.includes(id)) openTabs.push(id);
+    activeId = id;
+    await monacoReady;
+    showEditorPane();
+    showInEditor(id);
+    renderTabs();
+    renderTree();
+  }
 
-  // Save
-  async function saveProject(){
-    const r = await POST(`/developer/project/${PROJECT_ID}/save/`, {
-      title: document.getElementById('titleInput').value,
-      html_code: htmlEditor.getValue(),
-      css_code: cssEditor.getValue(),
-      js_code: jsEditor.getValue(),
-    });
-    if(r.ok){
-      document.getElementById('saveStatus').textContent = 'Saved just now';
-      toast('Project saved!', 'var(--green)');
-    } else {
-      toast(r.error || 'Could not save project', 'var(--red)');
+  function showInEditor(id) {
+    const f = files.get(id);
+    if (!f || !monacoEditor) return;
+    showEditorPane();
+    monacoEditor.updateOptions({ readOnly: false });
+
+    const model = monaco.editor.createModel(f.content, languageFor(f.path));
+    const old = monacoEditor.getModel();
+    monacoEditor.setModel(model);
+    if (old) old.dispose();
+
+    $('#statusPath').textContent = f.path;
+    if (!f.dirty) {
+      $('#statusSaved').textContent = 'Saved';
+      $('#statusSaved').classList.add('ok');
+      $('#statusSaved').classList.remove('warn');
     }
   }
-  document.getElementById('saveBtn').addEventListener('click', saveProject);
-  document.addEventListener('keydown', (e) => {
-    if((e.ctrlKey || e.metaKey) && e.key === 's'){
-      e.preventDefault();
-      saveProject();
-    }
-  });
 
-  // Publish / Unpublish
-  document.getElementById('publishBtn').addEventListener('click', async () => {
-    await saveProject();
-    const action = isPublished ? 'unpublish' : 'publish';
-    const r = await POST(`/developer/project/${PROJECT_ID}/publish/`, { action });
-    if(r.ok){
-      isPublished = r.project.is_published;
-      showcaseUrl = r.project.showcase_url;
-      const btn = document.getElementById('publishBtn');
-      if(isPublished){
-        btn.classList.add('published');
-        btn.innerHTML = '<i class="fas fa-check-circle"></i> Published';
-        document.getElementById('publishLink').value = window.location.origin + showcaseUrl;
-        document.getElementById('viewLiveLink').href = showcaseUrl;
-        document.getElementById('publishModal').classList.add('on');
-      } else {
-        btn.classList.remove('published');
-        btn.innerHTML = '<i class="fas fa-rocket"></i> Publish';
-        toast('Project unpublished');
+  // ── Save ──────────────────────────────────────────────────────
+  function scheduleAutosave() {
+    clearTimeout(autosaveTimer);
+    autosaveTimer = setTimeout(saveActive, 1200);
+  }
+
+  async function saveActive() {
+    const f = files.get(activeId);
+    if (!f || !f.dirty) return;
+    try {
+      await api('POST', URLS.saveFile(f.id), { content: f.content });
+      f.dirty = false;
+      $('#statusSaved').textContent = 'Saved';
+      $('#statusSaved').classList.add('ok');
+      $('#statusSaved').classList.remove('warn');
+      renderTabs();
+    } catch (e) {
+      toast('Save failed: ' + e.message, '#e53935');
+    }
+  }
+
+  async function saveAll() {
+    const title = $('#projectTitle').value.trim();
+    if (title) { try { await api('POST', URLS.saveProject, { title }); } catch (_) {} }
+
+    if (exts.format && monacoEditor && activeId) {
+      try { await monacoEditor.getAction('editor.action.formatDocument').run(); } catch (_) {}
+    }
+
+    let saved = 0;
+    for (const f of files.values()) {
+      if (f.dirty) {
+        try {
+          await api('POST', URLS.saveFile(f.id), { content: f.content });
+          f.dirty = false; saved++;
+        } catch (e) {
+          toast('Save failed for ' + f.path, '#e53935');
+        }
       }
-    } else {
-      toast(r.error || 'Could not update publish status', 'var(--red)');
     }
-  });
-  window.closePublishModal = function(){ document.getElementById('publishModal').classList.remove('on'); };
-  window.copyPublishLink = function(){
-    const input = document.getElementById('publishLink');
-    input.select();
-    navigator.clipboard?.writeText(input.value);
-    toast('Link copied!', 'var(--green)');
-  };
+    renderTabs();
+    $('#statusSaved').textContent = 'Saved';
+    $('#statusSaved').classList.add('ok');
+    $('#statusSaved').classList.remove('warn');
+    toast(saved ? `Saved ${saved} file${saved>1?'s':''}` : 'All saved', '#00b248');
+  }
 
-  // Asset upload
-  document.getElementById('assetInput').addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if(!file) return;
+  // ── Create file ───────────────────────────────────────────────
+  function openNewFileModal() {
+    $('#newFileModal').classList.add('on');
+    $('#newFileName').value = '';
+    setTimeout(() => $('#newFileName').focus(), 50);
+  }
+
+  async function createFile() {
+    const path = $('#newFileName').value.trim().replace(/^\/+/, '');
+    if (!path) { toast('Type a file name first', '#e53935'); return; }
+    try {
+      const r = await api('POST', URLS.createFile, { path });
+      files.set(r.file.id, {
+        id: r.file.id, path: r.file.path, content: r.file.content,
+        is_entry: r.file.is_entry, language: r.file.language, dirty: false,
+      });
+      const parts = r.file.path.split('/'); parts.pop();
+      let acc = '';
+      parts.forEach(p => { acc = acc ? acc + '/' + p : p; folders.add(acc); openFolders.add(acc); });
+      $('#newFileModal').classList.remove('on');
+      renderTree();
+      openFile(r.file.id);
+      populateFolderSelect();
+      toast('Created ' + r.file.path, '#00b248');
+    } catch (e) { toast(e.message, '#e53935'); }
+  }
+
+  // ── Create folder ─────────────────────────────────────────────
+  function openNewFolderModal() {
+    $('#newFolderModal').classList.add('on');
+    $('#newFolderName').value = '';
+    setTimeout(() => $('#newFolderName').focus(), 50);
+  }
+
+  async function createFolder() {
+    const name = $('#newFolderName').value.trim().replace(/^\/+|\/+$/g, '');
+    if (!name) { toast('Type a folder name first', '#e53935'); return; }
+    try {
+      await api('POST', URLS.createFolder, { path: name });
+      const parts = name.split('/'); let acc = '';
+      parts.forEach(p => { acc = acc ? acc + '/' + p : p; folders.add(acc); openFolders.add(acc); });
+      $('#newFolderModal').classList.remove('on');
+      renderTree();
+      populateFolderSelect();
+      toast('Folder created: ' + name, '#00b248');
+    } catch (e) { toast(e.message, '#e53935'); }
+  }
+
+  async function renameFolder(oldPath) {
+    const newPath = prompt('Rename folder:', oldPath);
+    if (!newPath || newPath === oldPath) return;
+
+    // Rename files inside
+    const affectedFiles = [...files.values()].filter(f =>
+      f.path === oldPath || f.path.startsWith(oldPath + '/'));
+    for (const f of affectedFiles) {
+      const newFile = newPath + f.path.slice(oldPath.length);
+      try {
+        await api('POST', URLS.renameFile(f.id), { path: newFile });
+        f.path = newFile;
+      } catch (e) { toast('Rename failed for ' + f.path, '#e53935'); }
+    }
+    // Rename assets inside
+    const affectedAssets = [...assets.values()].filter(a => {
+      const p = a.path || a.original_filename || '';
+      return p === oldPath || p.startsWith(oldPath + '/');
+    });
+    for (const a of affectedAssets) {
+      const oldP = a.path || a.original_filename;
+      const newP = newPath + oldP.slice(oldPath.length);
+      try {
+        await api('POST', URLS.deleteAsset(a.id) /* not used here */, {});
+      } catch (_) {}
+      a.path = newP;   // client-side only; server-side rename for assets not wired yet
+    }
+    folders.delete(oldPath);
+    folders.add(newPath);
+    openFolders.add(newPath);
+    renderTree();
+    renderTabs();
+    populateFolderSelect();
+    toast('Folder renamed', '#00b248');
+  }
+
+  async function deleteFolder(path) {
+    const affectedFiles = [...files.values()].filter(f =>
+      f.path === path || f.path.startsWith(path + '/'));
+    const affectedAssets = [...assets.values()].filter(a => {
+      const p = a.path || a.original_filename || '';
+      return p === path || p.startsWith(path + '/');
+    });
+    const total = affectedFiles.length + affectedAssets.length;
+    if (total && !confirm(`Delete folder "${path}" and its ${total} item(s)?`)) return;
+
+    for (const f of affectedFiles) {
+      try {
+        await api('POST', URLS.deleteFile(f.id));
+        files.delete(f.id);
+        closeTab(f.id);
+      } catch (_) {}
+    }
+    for (const a of affectedAssets) {
+      try {
+        await api('POST', URLS.deleteAsset(a.id));
+        assets.delete(a.id);
+        if (activeAssetId === a.id) {
+          activeAssetId = null;
+          showEditorPane();
+        }
+      } catch (_) {}
+    }
+    folders.delete(path);
+    renderTree();
+    populateFolderSelect();
+    toast('Folder deleted', '#e53935');
+  }
+
+  // ── Delete / set entry ────────────────────────────────────────
+  async function deleteFile(id) {
+    const f = files.get(id);
+    if (!f) return;
+    if (!confirm(`Delete "${f.path}"?`)) return;
+    try {
+      await api('POST', URLS.deleteFile(id));
+      files.delete(id);
+      closeTab(id);
+      renderTree();
+      toast('Deleted ' + f.path, '#e53935');
+    } catch (e) { toast('Delete failed: ' + e.message, '#e53935'); }
+  }
+
+  async function deleteAsset(id) {
+    const a = assets.get(id);
+    if (!a) return;
+    if (!confirm(`Delete image "${a.path || a.original_filename}"?`)) return;
+    try {
+      await api('POST', URLS.deleteAsset(id));
+      assets.delete(id);
+      if (activeAssetId === id) {
+        activeAssetId = null;
+        showEditorPane();
+      }
+      renderTree();
+      toast('Deleted image', '#e53935');
+    } catch (e) { toast('Delete failed: ' + e.message, '#e53935'); }
+  }
+
+  async function setEntryFile(id) {
+    try {
+      await api('POST', URLS.setEntry(id));
+      files.forEach(f => { f.is_entry = (f.id === id); });
+      renderTree(); renderTabs();
+      toast('Set as entry file', '#00b248');
+    } catch (e) { toast(e.message, '#e53935'); }
+  }
+
+  // ── Upload image ──────────────────────────────────────────────
+  let uploadFile = null;
+
+  function populateFolderSelect() {
+    const sel = $('#uploadFolderSelect');
+    if (!sel) return;
+    const current = sel.value;
+    sel.innerHTML = '';
+
+    const rootOpt = document.createElement('option');
+    rootOpt.value = '';
+    rootOpt.textContent = '/  (root)';
+    sel.appendChild(rootOpt);
+
+    [...folders].sort().forEach(f => {
+      const opt = document.createElement('option');
+      opt.value = f;
+      opt.textContent = f + '/';
+      sel.appendChild(opt);
+    });
+
+    if (current && [...sel.options].some(o => o.value === current)) {
+      sel.value = current;
+    }
+  }
+
+  function openUploadModal() {
+    $('#uploadModal').classList.add('on');
+    $('#uploadInput').value = '';
+    $('#uploadPreview').classList.remove('show');
+    $('#uploadPreview').src = '';
+    $('#uploadFileName').textContent = '';
+    $('#uploadFileName').classList.remove('show');
+    $('#uploadConfirmBtn').disabled = true;
+    $('#newFolderRow').classList.remove('show');
+    $('#uploadFolderNew').value = '';
+    uploadFile = null;
+    populateFolderSelect();
+  }
+
+  function wireUpload() {
+    const zone = $('#uploadZone');
+    const input = $('#uploadInput');
+
+    zone.addEventListener('click', () => input.click());
+    zone.addEventListener('dragover', (e) => {
+      e.preventDefault(); zone.classList.add('dragover');
+    });
+    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+    zone.addEventListener('drop', (e) => {
+      e.preventDefault(); zone.classList.remove('dragover');
+      const f = e.dataTransfer.files[0];
+      if (f) setUploadFile(f);
+    });
+    input.addEventListener('change', () => {
+      const f = input.files[0];
+      if (f) setUploadFile(f);
+    });
+
+    $('#toggleNewFolderBtn').addEventListener('click', () => {
+      const row = $('#newFolderRow');
+      const showing = row.classList.toggle('show');
+      if (showing) setTimeout(() => $('#uploadFolderNew').focus(), 50);
+    });
+
+    $('#confirmNewFolderBtn').addEventListener('click', async () => {
+      const name = $('#uploadFolderNew').value.trim().replace(/^\/+|\/+$/g, '');
+      if (!name) { toast('Type a folder name', '#e53935'); return; }
+      try {
+        await api('POST', URLS.createFolder, { path: name });
+        const parts = name.split('/'); let acc = '';
+        parts.forEach(p => { acc = acc ? acc + '/' + p : p; folders.add(acc); openFolders.add(acc); });
+        populateFolderSelect();
+        $('#uploadFolderSelect').value = name;
+        $('#newFolderRow').classList.remove('show');
+        $('#uploadFolderNew').value = '';
+        renderTree();
+        toast('Folder created: ' + name, '#00b248');
+      } catch (e) { toast(e.message, '#e53935'); }
+    });
+  }
+
+  function setUploadFile(f) {
+    if (!f.type.startsWith('image/')) {
+      toast('Only image files allowed', '#e53935'); return;
+    }
+    if (f.size > 5 * 1024 * 1024) {
+      toast('Max 5 MB', '#e53935'); return;
+    }
+    uploadFile = f;
+    $('#uploadFileName').textContent = `Selected: ${f.name} (${(f.size/1024).toFixed(1)} KB)`;
+    $('#uploadFileName').classList.add('show');
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      $('#uploadPreview').src = e.target.result;
+      $('#uploadPreview').classList.add('show');
+    };
+    reader.readAsDataURL(f);
+    $('#uploadConfirmBtn').disabled = false;
+  }
+
+  async function confirmUpload() {
+    if (!uploadFile) return;
     const fd = new FormData();
-    fd.append('file', file);
-    toast('Uploading...', 'var(--blue)');
-    const r = await POST_FORM(`/developer/project/${PROJECT_ID}/upload/`, fd);
-    if(r.ok){
-      const row = document.getElementById('assetsRow');
-      document.getElementById('assetsEmpty')?.remove();
-      const chip = document.createElement('div');
-      chip.className = 'asset-chip';
-      chip.dataset.url = r.url;
-      chip.innerHTML = `<img src="${r.url}" alt=""><span class="asset-name">${r.name}</span>
-        <button onclick="insertAsset('${r.url}')" title="Insert into HTML"><i class="fas fa-plus"></i></button>
-        <button onclick="copyAssetUrl('${r.url}')" title="Copy URL"><i class="fas fa-copy"></i></button>`;
-      row.appendChild(chip);
-      toast('Image uploaded!', 'var(--green)');
-    } else {
-      toast(r.error || 'Upload failed', 'var(--red)');
+    fd.append('file', uploadFile);
+    const folder = ($('#uploadFolderSelect').value || '').trim();
+    if (folder) fd.append('folder', folder);
+
+    try {
+      const r = await fetch(URLS.uploadAsset, {
+        method: 'POST', credentials:'include',
+        headers: { 'X-CSRFToken': CSRF },
+        body: fd,
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || 'Upload failed');
+
+      const filePath = data.path || (folder ? folder + '/' + data.name : data.name);
+
+      // Register folder
+      if (folder) {
+        const parts = folder.split('/'); let acc = '';
+        parts.forEach(p => { acc = acc ? acc + '/' + p : p; folders.add(acc); openFolders.add(acc); });
+      }
+
+      // Add to ASSETS — never files
+      assets.set(data.id, {
+        id: data.id,
+        path: filePath,
+        url: data.url,
+        original_filename: data.name,
+      });
+
+      $('#uploadModal').classList.remove('on');
+      renderTree();
+      populateFolderSelect();
+      toast('Uploaded to ' + (folder || 'root') + '/' + data.name, '#00b248');
+
+      // Offer to insert if there's an active HTML file
+      const currentFile = files.get(activeId);
+      if (currentFile && currentFile.path.endsWith('.html')) {
+        if (confirm(`Insert this image into ${basename(currentFile.path)}?`)) {
+          insertAssetIntoHTML({ url: data.url, name: data.name, path: filePath });
+        }
+      }
+    } catch (e) {
+      toast('Upload failed: ' + e.message, '#e53935');
     }
-    e.target.value = '';
+  }
+
+  function insertAssetIntoHTML(asset) {
+    const currentFile = files.get(activeId);
+    if (!currentFile || !currentFile.path.endsWith('.html')) {
+      toast('Open an HTML file first', '#e53935');
+      return;
+    }
+    if (activeAssetId) openFile(activeId);  // restore editor pane
+    showEditorPane();
+    showInEditor(activeId);
+
+    // Compute relative path from current HTML file's folder
+    const htmlDir = dirname(currentFile.path);
+    const assetPath = asset.path || asset.original_filename || '';
+    let relPath = assetPath;
+    if (htmlDir && assetPath.startsWith(htmlDir + '/')) {
+      relPath = assetPath.slice(htmlDir.length + 1);
+    }
+
+    // If we don't have a nice path, fall back to the URL
+    const src = relPath || asset.url;
+    const tag = `<img src="${src}" alt="${asset.name || basename(assetPath)}">`;
+
+    const pos = monacoEditor.getPosition();
+    monacoEditor.executeEdits('insert-asset', [{
+      range: new monaco.Range(pos.lineNumber, pos.column, pos.lineNumber, pos.column),
+      text: tag,
+    }]);
+    monacoEditor.focus();
+    toast('Inserted into ' + currentFile.path, '#00b248');
+  }
+
+  // Insert button in image viewer
+  document.addEventListener('click', (e) => {
+    if (e.target.id === 'imageViewerInsert' && activeAssetId) {
+      insertAssetIntoHTML(assets.get(activeAssetId));
+    }
   });
 
-  window.insertAsset = function(url){
-    document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
-    document.querySelector('.code-tab[data-tab="html"]').classList.add('active');
-    Object.values(boxes).forEach(id => document.getElementById(id).classList.remove('active'));
-    document.getElementById('boxHtml').classList.add('active');
-    setTimeout(() => {
-      htmlEditor.layout();
-      htmlEditor.focus();
-      const selection = htmlEditor.getSelection();
-      const tag = `<img src="${url}" alt="">`;
-      htmlEditor.executeEdits('insert-asset', [{ range: selection, text: tag, forceMoveMarkers: true }]);
-    }, 0);
-  };
-  window.copyAssetUrl = function(url){
-    navigator.clipboard?.writeText(window.location.origin + url);
-    toast('Image URL copied!', 'var(--green)');
-  };
+  // ── Preview ───────────────────────────────────────────────────
+  function buildPreview() {
+    const list = [...files.values()];
+    const entry = list.find(f => f.is_entry)
+               || list.find(f => /\.html?$/i.test(f.path))
+               || list[0];
 
-  async function loadProfile(){
-    const r = await api('GET', '/api/me/');
-    if(r.error) window.location.href = '/login/';
+    if (!entry) {
+      return `<!DOCTYPE html><html><body style="font-family:sans-serif;padding:24px;color:#666">
+        <h2>Nothing to preview yet</h2>
+        <p>Create an <code>index.html</code> file first.</p>
+      </body></html>`;
+    }
+    if (!/\.html?$/i.test(entry.path)) {
+      return `<!DOCTYPE html><html><body style="font-family:monospace;font-size:13px;padding:14px;white-space:pre-wrap">${escapeHtml(entry.content)}</body></html>`;
+    }
+
+    let html = entry.content;
+    const entryDir = dirname(entry.path);
+
+    function resolveFile(ref) {
+      ref = ref.replace(/^\.\//, '').replace(/^\//, '');
+      let f = list.find(x => x.path === ref);
+      if (f) return f;
+      if (entryDir) {
+        f = list.find(x => x.path === entryDir + '/' + ref);
+        if (f) return f;
+      }
+      return list.find(x => x.path.endsWith('/' + ref) || x.path.endsWith(ref));
+    }
+
+    function resolveAsset(ref) {
+      ref = ref.replace(/^\.\//, '').replace(/^\//, '');
+      // try exact
+      let a = [...assets.values()].find(x => (x.path || '') === ref);
+      if (a) return a;
+      if (entryDir) {
+        a = [...assets.values()].find(x => (x.path || '') === entryDir + '/' + ref);
+        if (a) return a;
+      }
+      // try basename
+      const base = basename(ref);
+      return [...assets.values()].find(x => basename(x.path || '') === base);
+    }
+
+    html = html.replace(/<link[^>]+href=["']([^"']+\.css)["'][^>]*>/gi, (m, href) => {
+      const f = resolveFile(href);
+      return f ? `<style>\n${f.content}\n</style>` : m;
+    });
+    html = html.replace(/<script[^>]+src=["']([^"']+\.js)["'][^>]*><\/script>/gi, (m, src) => {
+      const f = resolveFile(src);
+      return f ? `<script>\n${f.content}\n<\/script>` : m;
+    });
+    // Replace <img src> with asset URL
+    html = html.replace(/(<img[^>]+src=["'])([^"']+)(["'])/gi, (m, pre, src, post) => {
+      if (/^https?:|^data:/.test(src)) return m;
+      const a = resolveAsset(src);
+      return a ? `${pre}${a.url}${post}` : m;
+    });
+
+    return html;
   }
-  loadProfile();
+
+  function openPreview() {
+    const entry = [...files.values()].find(f => f.is_entry)
+                || [...files.values()].find(f => /\.html?$/i.test(f.path));
+    $('#previewLabel').textContent = entry ? entry.path : 'no entry file';
+    $('#previewFrame').srcdoc = buildPreview();
+    $('#previewModal').classList.add('on');
+  }
+
+  // ── Publish ───────────────────────────────────────────────────
+  async function togglePublish() {
+    const action = projectIsPublished ? 'unpublish' : 'publish';
+    if (!projectIsPublished) await saveAll();
+    try {
+      const r = await api('POST', URLS.publish, { action });
+      projectIsPublished = r.project.is_published;
+      $('#publishLabel').textContent = projectIsPublished ? 'Unpublish' : 'Publish';
+      updateOpenLiveBtn(r.project.showcase_url);
+      toast(projectIsPublished ? 'Published! Live link is ready.' : 'Unpublished', '#00b248');
+    } catch (e) { toast('Publish failed: ' + e.message, '#e53935'); }
+  }
+
+  function updateOpenLiveBtn(url) {
+    const btn = $('#openLiveBtn');
+    const live = url || PUBLISHED_URL;
+    if (projectIsPublished && live) {
+      btn.style.display = 'inline-flex';
+      btn.dataset.url = live;
+    } else {
+      btn.style.display = 'none';
+    }
+  }
+
+  // ── Extensions wiring ────────────────────────────────────────
+  function wireExtSwitches() {
+    document.querySelectorAll('.switch[data-ext]').forEach(sw => {
+      const key = sw.dataset.ext;
+      sw.classList.toggle('on', !!exts[key]);
+      sw.addEventListener('click', () => {
+        exts[key] = !exts[key];
+        sw.classList.toggle('on', exts[key]);
+        saveExts();
+        applyExtOptions();
+      });
+    });
+
+    document.querySelectorAll('.ext-tab').forEach(t => {
+      t.addEventListener('click', () => {
+        document.querySelectorAll('.ext-tab').forEach(x => x.classList.remove('active'));
+        document.querySelectorAll('.ext-panel').forEach(x => x.classList.remove('active'));
+        t.classList.add('active');
+        $('#panel-' + t.dataset.tab).classList.add('active');
+      });
+    });
+
+    document.querySelectorAll('.icon-style-opt').forEach(el => {
+      el.classList.toggle('active', el.dataset.style === iconStyle);
+      el.addEventListener('click', () => {
+        iconStyle = el.dataset.style;
+        localStorage.setItem('iconStyle', iconStyle);
+        document.querySelectorAll('.icon-style-opt').forEach(x =>
+          x.classList.toggle('active', x.dataset.style === iconStyle));
+        const meta = STYLE_LABELS[iconStyle];
+        $('#statusIcon').innerHTML = `<i class="${meta.preview}" style="color:${meta.previewColor}"></i> ${meta.label}`;
+        renderTree(); renderTabs();
+      });
+    });
+
+    $('#fontMinus').addEventListener('click', () => {
+      fontSize = Math.max(10, fontSize - 1);
+      localStorage.setItem('devFontSize', fontSize);
+      $('#fontSizeLabel').textContent = fontSize;
+      applyExtOptions();
+    });
+    $('#fontPlus').addEventListener('click', () => {
+      fontSize = Math.min(24, fontSize + 1);
+      localStorage.setItem('devFontSize', fontSize);
+      $('#fontSizeLabel').textContent = fontSize;
+      applyExtOptions();
+    });
+    $('#fontSizeLabel').textContent = fontSize;
+
+    document.querySelectorAll('[data-theme]').forEach(b => {
+      b.addEventListener('click', () => {
+        editorTheme = b.dataset.theme;
+        localStorage.setItem('devTheme', editorTheme);
+        applyExtOptions();
+      });
+    });
+  }
+
+  // ── Wire up ───────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+
+    const titleInput = $('#projectTitle');
+    let originalTitle = titleInput.value;
+    titleInput.addEventListener('blur', async () => {
+      const v = titleInput.value.trim();
+      if (v && v !== originalTitle) {
+        try {
+          await api('POST', URLS.saveProject, { title: v });
+          originalTitle = v;
+          toast('Title saved', '#00b248');
+        } catch (_) { toast('Could not save title', '#e53935'); }
+      }
+    });
+    titleInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') titleInput.blur(); });
+
+    $('#saveBtn').addEventListener('click', saveAll);
+    $('#previewBtn').addEventListener('click', openPreview);
+    $('#publishBtn').addEventListener('click', togglePublish);
+    $('#openLiveBtn').addEventListener('click', () => {
+      const u = $('#openLiveBtn').dataset.url;
+      if (u) window.open(u, '_blank');
+    });
+
+    $('#newFileBtn').addEventListener('click', openNewFileModal);
+    $('#newFolderBtn').addEventListener('click', openNewFolderModal);
+    $('#uploadBtn').addEventListener('click', openUploadModal);
+
+    $('#createFileBtn').addEventListener('click', createFile);
+    $('#newFileName').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') createFile();
+      if (e.key === 'Escape') $('#newFileModal').classList.remove('on');
+    });
+    $('#createFolderBtn').addEventListener('click', createFolder);
+    $('#newFolderName').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') createFolder();
+      if (e.key === 'Escape') $('#newFolderModal').classList.remove('on');
+    });
+
+    wireUpload();
+    $('#uploadConfirmBtn').addEventListener('click', confirmUpload);
+
+    $('#refreshPreview').addEventListener('click', () => {
+      $('#previewFrame').srcdoc = buildPreview();
+    });
+    $('#openPreviewTab').addEventListener('click', () => {
+      const w = window.open('', '_blank');
+      w.document.write(buildPreview());
+      w.document.close();
+    });
+
+    $('#extBtn').addEventListener('click', () => $('#extModal').classList.add('on'));
+    wireExtSwitches();
+
+    document.querySelectorAll('[data-close]').forEach(b => {
+      b.addEventListener('click', () => b.closest('.modal').classList.remove('on'));
+    });
+    document.querySelectorAll('.modal').forEach(m => {
+      m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('on'); });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault(); saveAll();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n') {
+        e.preventDefault(); openNewFileModal();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
+        e.preventDefault(); openPreview();
+      }
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal.on').forEach(m => m.classList.remove('on'));
+      }
+    });
+
+    window.addEventListener('beforeunload', (e) => {
+      if ([...files.values()].some(f => f.dirty)) {
+        e.preventDefault(); e.returnValue = '';
+      }
+    });
+
+    const meta = STYLE_LABELS[iconStyle];
+    $('#statusIcon').innerHTML = `<i class="${meta.preview}" style="color:${meta.previewColor}"></i> ${meta.label}`;
+
+    boot();
+  });
 })();
 </script>
 </body>
