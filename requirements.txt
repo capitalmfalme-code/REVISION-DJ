@@ -63,3 +63,5 @@ PyPDF2==3.0.1
 # - gunicorn is the production WSGI server
 # - whitenoise serves static files in production
 # =============================================================================
+
+django-anymail==11.0
